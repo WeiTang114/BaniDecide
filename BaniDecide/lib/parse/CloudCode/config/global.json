@@ -1,0 +1,14 @@
+{
+    "applications": {
+        "BaniDecide": {
+            "applicationId": "EeGKlcEmDhT5SMjQhs6iRaYdIIohsM6rGWNn9iP2", 
+            "masterKey": "V625rZyWecPV7JPzazhGhbLhvdAZiOa9YJ5c0nhZ"
+        }, 
+        "_default": {
+            "link": "BaniDecide"
+        }
+    }, 
+    "global": {
+        "parseVersion": "1.3.4"
+    }
+}

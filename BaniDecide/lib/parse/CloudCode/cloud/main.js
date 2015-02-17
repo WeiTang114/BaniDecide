@@ -1,7 +1,6 @@
 
 var RESP_BADREQUEST = "Bad request.";
 var RESP_UNKNOWN = "Unknown Error.";
-var RESP_QUERY
 
 
 

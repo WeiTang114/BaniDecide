@@ -18,14 +18,14 @@ Parse.Cloud.define("hello", function(request, response) {
  * 
  * request: {"qid":qid}
  * response: 
- *   success: {"items":[q, a, b, c, d], "numbers":[n1, n2, n3, n4]}
- *   fail: {"failtype":"message"}
+ *   success: {"q":q, "a":[a, b, c, d], "counts":[n1, n2, n3, n4]}
+ *   fail: "message"
  */
 Parse.Cloud.define("getQuestion", function(request, response) {
   var qid = request.params.qid;
   if (typeof qid === 'undefined' || qid == null) {
     response.error(
-      JSON.stringify({failtype: RESP_BADREQUEST + 'correct: {"qid":qid}'})
+      JSON.stringify(RESP_BADREQUEST + 'correct: {"qid":qid}')
     );
   }
 
@@ -34,43 +34,43 @@ Parse.Cloud.define("getQuestion", function(request, response) {
   query.get(qid).then(function(question) {
     var qJSON = question.toJSON();
     var qResp = {
-      items: [qJSON.q].concat(qJSON.items),
-      numbers: qJSON.numbers,
+      q: qJSON.q,
+      a: qJSON.a,
+      counts: qJSON.counts,
     }
     response.success(JSON.stringify(qResp));
   }, function(error) {
     console.log("Error A: " + error)
-    response.error(JSON.stringify({"failtype":error}));
+    response.error(error);
   });
 });
 
 /**
  * add a new question
  * 
- * request:  {"items":[q, a, b, c, d]}
+ * request:  {"q":q, "a":[q, a, b, c, d]}
  * response: 
  *   success: {"qid":qid}  
- *   fail: {"failtype":"message"}
+ *   fail: "message"
  */
 Parse.Cloud.define("addQuestion", function(request, response) {
-  var items = request.params.items;
-  if (typeof items === 'undefined' || items == null) {
-    response.error(
-      JSON.stringify({failtype: RESP_BADREQUEST + 'correct: {"qid":qid}'})
-    );
+  var q = request.params.q;
+  var a = request.params.a;
+  if (isNullOrUndef(q) || isNullOrUndef(a) || a.length != 4) {
+    response.error(RESP_BADREQUEST + 'correct: {"q":q, "a":[a1,a2,a3,a4]}');
   }
 
   var Question = Parse.Object.extend("Question");
   var question = new Question();
-  question.set("q", items[0])
-  question.set("items", items.slice(1, 1 + 4));
-  question.set("numbers", [0, 0, 0, 0]);
+  question.set("q", q)
+  question.set("a", a);
+  question.set("counts", [0, 0, 0, 0]);
   question.save(null).then(function(qAgain) {
     var qid = qAgain.id;
     response.success(JSON.stringify({"qid":qid}));
   }, function(error) {
     console.log("Error B: " + error)
-    response.error(JSON.stringify({"failtype":error}));
+    response.error(error);
   });
 });
 
@@ -80,7 +80,7 @@ Parse.Cloud.define("addQuestion", function(request, response) {
  * 
  * request:  {"uid":uid, "qid":qid, "number":n}
  * response: 
- *   success: ~~
+ *   success: {"counts":counts}
  *   fail: {"failtype":"message"}
  */
 Parse.Cloud.define("selectItem", function(request, response) {
@@ -92,14 +92,13 @@ Parse.Cloud.define("selectItem", function(request, response) {
   if (isNullOrUndef(uid) || 
       isNullOrUndef(qid) ||
       isNullOrUndef(number)) {
-    response.error(
-      JSON.stringify({failtype: RESP_BADREQUEST + 'correct: {"uid":uid, "qid":qid, "number":n}'})
-    );
+    response.error(RESP_BADREQUEST + 'correct: {"uid":uid, "qid":qid, "number":n}');
   }
 
   var MyUser = Parse.Object.extend("MyUser");
   var query = new Parse.Query(MyUser);
   var myUser;
+  var qJSON;
   query.equalTo("uid", uid);
   query.find().then(function(myUserList) {
     console.log("myUserList:" + JSON.stringify(myUserList));
@@ -120,18 +119,24 @@ Parse.Cloud.define("selectItem", function(request, response) {
     }
   }).then(function(newUserAgain){
     // new user added
-    myUser = newUserAgain;
-
+    if (!isNullOrUndef(newUserAgain)) {
+      myUser = newUserAgain;
+      console.log("myUser = " + newUserAgain);
+    }
     // select!
     var Question = Parse.Object.extend("Question");
     query = new Parse.Query(Question);
     return query.get(qid);
   }).then(function(question) {
+    if (number < 0 || number > 3) {
+      return Parse.Promise.error("number is not between 0 and 3, number = " + number);
+    }
+
     // get question object
-    var qJSON = question.toJSON();
+    qJSON = question.toJSON();
     console.log("item number ++");
-    qJSON.numbers[number] ++;
-    return question.save({numbers: qJSON.numbers});
+    qJSON.counts[number] ++;
+    return question.save({counts: qJSON.counts});
   }).then(function(qAgain) {
     // question item seleted
     var myUJSON = myUser.toJSON();
@@ -139,10 +144,10 @@ Parse.Cloud.define("selectItem", function(request, response) {
     return myUser.save({answeredQids: myUJSON.answeredQids});
   }).then(function(results){
     // done
-    response.success("OK");
+    response.success(JSON.stringify({counts:qJSON.counts}));
   }, function(error) {
     console.log("Error: " + error)
-    response.error(JSON.stringify({"failtype":error}));
+    response.error(error);
   });
 });
 

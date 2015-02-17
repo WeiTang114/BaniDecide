@@ -27,6 +27,7 @@ Parse.Cloud.define("getQuestion", function(request, response) {
     response.error(
       JSON.stringify(RESP_BADREQUEST + 'correct: {"qid":qid}')
     );
+    return;
   }
 
   var Question = Parse.Object.extend("Question");
@@ -58,6 +59,7 @@ Parse.Cloud.define("addQuestion", function(request, response) {
   var a = request.params.a;
   if (isNullOrUndef(q) || isNullOrUndef(a) || a.length != 4) {
     response.error(RESP_BADREQUEST + 'correct: {"q":q, "a":[a1,a2,a3,a4]}');
+    return;
   }
 
   var Question = Parse.Object.extend("Question");
@@ -93,6 +95,7 @@ Parse.Cloud.define("selectItem", function(request, response) {
       isNullOrUndef(qid) ||
       isNullOrUndef(number)) {
     response.error(RESP_BADREQUEST + 'correct: {"uid":uid, "qid":qid, "number":n}');
+    return;
   }
 
   var MyUser = Parse.Object.extend("MyUser");

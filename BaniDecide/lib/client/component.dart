@@ -34,7 +34,7 @@ class QuestionInput {
 
 
 class QuestionOutput {
-  TextInputElement question;
+  Element question;
   List<RadioButtonInputElement> options = new List(DEFAULT_OPTION_NUM);
   List<DivElement> optionsCount = new List(DEFAULT_OPTION_NUM);
   

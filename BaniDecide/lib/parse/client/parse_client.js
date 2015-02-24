@@ -25,8 +25,7 @@ function initParse() {
  */
 function getQuestion(qid, onSuccess, onFailure) {
   if (!init) {
-    console.error("getQuestoin(): initParse() hasn't been called.");
-    return;
+    initParse();
   }
   Parse.Cloud.run("getQuestion", {qid: qid}).then(function(respStr) {
     console.log(respStr);
@@ -53,8 +52,7 @@ function getQuestion(qid, onSuccess, onFailure) {
  */
 function addQuestion(question, answers, onSuccess, onFailure) {
   if (!init) {
-    console.error("addQuestoin(): initParse() hasn't been called.");
-    return;
+    initParse();
   }
 
   Parse.Cloud.run("addQuestion", {q: question, a: answers}).then(function(respStr) {
@@ -85,8 +83,7 @@ function addQuestion(question, answers, onSuccess, onFailure) {
  */
 function selectItem(uid, qid, number, onSuccess, onFailure) {
   if (!init) {
-    console.error("selectItem(): initParse() hasn't been called.");
-    return;
+    initParse();
   }
 
   Parse.Cloud.run("selectItem", 

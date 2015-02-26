@@ -30,7 +30,6 @@ function fb_login(){
 		if (response.authResponse) {
 			uid = response.authResponse.userID;
 			accessToken = response.authResponse.accessToken;
-			return true;
 		}
 	}, {
 	scope: 'email,publish_stream'

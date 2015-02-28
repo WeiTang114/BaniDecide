@@ -1,0 +1,70 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Sample</title>
+
+  <!-- SDK dependency -->
+  <script src="http://www.parsecdn.com/js/parse-1.3.4.min.js"></script>
+  <script src="../parse_client.js"></script>
+</head>
+
+<body>
+  <script>
+    initParse();
+  </script>
+
+
+  請開啟console並配合code~
+  <div>
+    <button onclick="testGetQuestion()">TestGetQuestion</button>
+  </div>
+  <div>
+    <button onclick="testAddQuestion()">TestAddQuestion</button>
+  </div>
+  <div>
+    <button onclick="testSelectItem()">TestSelectItem</button>
+  </div>
+  <p id="p1">Result will be shown here</p>
+  <script>
+    function showResult(txt) {
+      document.getElementById("p1").innerHTML = txt;
+    }
+
+    function testGetQuestion() {
+      var qid = "s9Xpx3W4AZ";
+      getQuestion(qid, function(resp) {
+        showResult("Question: " + resp.q + ", options:" + resp.a + ", " + resp.counts);
+      }, function (resp) {
+        console.log(JSON.stringify(resp));
+        showResult(resp.failtype);
+      });
+    }
+
+    function testAddQuestion() {
+      var q = "新年快樂";
+      var a = ["快樂", "不快樂", "很爽", "沒差吧"];
+      addQuestion(q, a, function(resp) {
+        showResult("New qid: " + resp.qid);
+      }, function (resp) {
+        showResult(resp.failtype);
+      });
+    }
+
+    function testSelectItem() {
+      var uid = "abc"; //whatever
+      var qid = "s9Xpx3W4AZ"; // 和testGetQUestion同一題
+      var number = 0;  // 0~3
+      selectItem(uid, qid, number, function(resp) {
+        showResult("New counts: " + resp.counts);
+      }, function (resp) {
+        showResult(resp.failtype);
+      });
+    }
+  </script>
+
+
+
+</body>
+</html> 

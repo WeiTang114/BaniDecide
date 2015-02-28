@@ -1,0 +1,26 @@
+#title {
+  padding-top: 50px;
+  padding-bottom: 20px;
+  font-size: 32px;
+}
+
+#question_container {
+  padding-top: 5%;
+}
+
+#title, #question, .option, #create_question {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+#question, .option{
+  width: 50%;
+  font-size: 16px;
+}
+
+#create_question {
+  width: 110px;
+  display: block;
+  font-size: 18px;
+}

@@ -2,6 +2,7 @@ library client.component;
 
 import "dart:html";
 import "dart:async";
+import "dart:js" as js;
 
 import '../generic/field_name.dart';
 
@@ -9,73 +10,129 @@ class QuestionInput {
   TextInputElement question;
   List<TextInputElement> options = new List(DEFAULT_OPTION_NUM);
   
+  FormElement _sender;
+  String _qid;
+  
   QuestionInput() {
-    question = querySelector('');
-    options = querySelectorAll('');
+    question = querySelector('#question');
+    options = querySelectorAll('.option');
+    _sender = querySelector('#send-form');
+    _startSubmitListener();
   }
   
-  Future submit() {
-    final Completer completer = new Completer();
-    return completer.future;
+  void _startSubmitListener() {
+    querySelector('#create_question').onClick.listen((_) {
+      if (_isValidInput) {
+        _addQuestion().then((response) {
+          _qid = response[QUESTION_ID];
+print("qid: $_qid");
+          _jumpPage();
+        }).catchError((ex)
+            => print('fail to add question: $ex'));
+      }
+    });    
   }
   
-  Map _jsonOfAddQuestion() {
-    List data = new List() 
-      ..add(question.text);
-    options.forEach((option) {
-      data.add(option.text);
-    });
+  Future _addQuestion() {
+    final Completer cmpl = new Completer();
     
-    Map json = new Map();
-    json[QUESTION_INFO] = data;
-    return json;
+    var ok = (response) => cmpl.complete(response);
+    var fail = (error) => cmpl.completeError(error[FAIL_TYPE]);
+    js.context.callMethod('addQuestion', [_q, new js.JsArray.from(_ans), ok, fail]);
+    
+    return cmpl.future;
+  }
+  
+  void _jumpPage() {
+    AnchorElement jump = querySelector('#jump-page');
+    jump.href = 'question.html?' + _qid;
+    jump.click();
+  }
+  
+  String get _q => question.value;
+  
+  List<String> get _ans {
+    List<String> a = new List(DEFAULT_OPTION_NUM);
+    for (int i = 0; i < DEFAULT_OPTION_NUM; i++)
+      a[i] = options[i].value;
+    return a;
+  }
+  
+  bool get _isValidInput {
+    if (_q.isEmpty) return false;
+    for (int i = 0; i < 4; i++)
+      if (_ans[i].isEmpty) return false;
+    return true;
   }
 }
 
 
 class QuestionOutput {
-  Element question;
-  List<RadioButtonInputElement> options = new List(DEFAULT_OPTION_NUM);
+  SpanElement question;
+  List<RadioButtonInputElement> optionsRadio = new List(DEFAULT_OPTION_NUM);
+  List<SpanElement> options = new List(DEFAULT_OPTION_NUM);
   List<DivElement> optionsCount = new List(DEFAULT_OPTION_NUM);
   
-  String uid;
   String qid;
+  String uid;
   
-  QuestionOutput(this.uid, this.qid) {
-    question = querySelector('');
-    options = querySelectorAll('');
-    optionsCount = querySelectorAll('');
+  QuestionOutput(this.qid) {
+    question = querySelector('#question_wrapper .content');
+    optionsRadio = querySelectorAll('#option_wrapper #options input');
+    options = querySelectorAll('#option_wrapper #options .content');
+    optionsCount = querySelectorAll('#option_wrapper #options .count');
   }
   
-  void generate(Map json) {
-    List<String> questionInfo = json[QUESTION_INFO];
-    List<String> optsCount = json[OPTIONS_COUNT];
+  void generate() {
+    _getQuestion().then((response) {
+      question.text = response[QUESTION_CONTENT];
+      for (int i = 0; i < DEFAULT_OPTION_NUM; i++) {
+        options[i].text = response[QUESTION_OPTIONS][i].toString();
+        optionsCount[i].text = response[OPTIONS_COUNTS][i].toString() + ' 票';
+      }  
+    }).catchError((ex)
+        => print('fail to generate question: $ex'));
+  }
+  
+  void select() {
+    _selectItem().then((response) {
+      for (int i = 0; i < DEFAULT_OPTION_NUM; i++) 
+        optionsCount[i].text = response[OPTIONS_COUNTS][i];
+    }).catchError((ex)
+        => print('fail to select option: $ex'));
+  }
+  
+  Future _getQuestion() {
+    final Completer cmpl = new Completer();
     
-    question.text = questionInfo[0];
-    for (int i = 0; i < DEFAULT_OPTION_NUM; i++) {
-      options[i].text = questionInfo[i+1];
-      optionsCount[i].text = optsCount[i];
+    var ok = (response) => cmpl.complete(response);
+    var fail = (error) => cmpl.completeError(error);
+    js.context.callMethod('getQuestion', [qid, ok, fail]);
+    
+    return cmpl.future;
+  }
+  
+  Future _selectItem() {
+    final Completer cmpl = new Completer();
+
+    if (!_isLoggedin) {
+      print("Please login first!");
+    } else {
+      var ok = (response) => cmpl.complete(response);
+      var fail = (error) => cmpl.completeError(error);
+      js.context.callMethod('selectItem', [uid, qid, _selectedOption, ok, fail]);
     }
-  }
-  
-  Future select() {
-    final Completer completer = new Completer();
-    return completer.future;
-  }
-  
-  Map _jsonOfSelectOption() {
-    Map json = new Map();
-    json[USER_ID] = uid;
-    json[QUESTION_ID] = qid;
-    json[OPTION_SELECTED] = _selectedOption;
-    return json;
+    return cmpl.future;
   }
   
   int get _selectedOption {
     for (int i = 0; i < DEFAULT_OPTION_NUM; i++) {
-      if (options[i].checked)
+      if (optionsRadio[i].checked)
         return i;
     }
     return NONE_SELECTED;
   }
+  
+  bool get _isLoggedin
+    => js.context.callMethod('getloginstatus');
 }

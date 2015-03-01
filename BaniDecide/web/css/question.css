@@ -1,11 +1,11 @@
-#question_wrapper, #option_wrapper {
+#question_wrapper, #option_wrapper, #fb-comment-container {
   width: 50%;
   margin-left: auto;
   margin-right: auto;
 }
 
 #question_wrapper {
-  padding-top: ˋ%;
+  padding-top: 4%;
   margin-bottom: 4%;
   font-size:24px;
 }
@@ -27,7 +27,26 @@
   display: inline;
 }
 
-
 .count {
   float: right;
+}
+
+#fb-comment-container {
+  margin-top: 2%;
+}
+
+#buttons {
+  height: 70px;
+}
+
+#buttons button {
+  float: right;
+  padding: 0px;
+  border: 0px;
+  margin-left: 10px;
+}
+
+.fb-comments {
+  margin-left: auto;
+  margin-right: auto;
 }

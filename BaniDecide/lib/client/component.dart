@@ -94,10 +94,15 @@ class QuestionOutput {
         => print('fail to generate question: $ex'));
   }
   
-  void select() {
+  void startSelectListener() {
+    optionsRadio.forEach((RadioButtonInputElement optionRadio) {
+      optionRadio.onClick.listen((_) => _select());
+    });
+  }
+  void _select() {
     _selectItem().then((response) {
       for (int i = 0; i < DEFAULT_OPTION_NUM; i++) 
-        optionsCount[i].text = response[OPTIONS_COUNTS][i];
+        optionsCount[i].text = response[OPTIONS_COUNTS][i].toString() + ' 票';
     }).catchError((ex)
         => print('fail to select option: $ex'));
   }
@@ -117,7 +122,10 @@ class QuestionOutput {
 
     if (!_isLoggedin) {
       print("Please login first!");
+      js.context.callMethod('fb_login');
     } else {
+      uid = js.context['uid'].toString();
+      print('uid: $uid');
       var ok = (response) => cmpl.complete(response);
       var fail = (error) => cmpl.completeError(error);
       js.context.callMethod('selectItem', [uid, qid, _selectedOption, ok, fail]);
@@ -134,5 +142,14 @@ class QuestionOutput {
   }
   
   bool get _isLoggedin
-    => js.context.callMethod('getloginstatus');
+    => js.context.callMethod('getLoginState').toString() != '3';
+}
+
+
+class FBComment {
+  DivElement a;
+  
+  FBComment(String url) {
+    a.dataset['href'] = url;
+  }
 }

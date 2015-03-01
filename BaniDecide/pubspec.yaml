@@ -9,6 +9,7 @@ environment:
   sdk: '>=1.0.0 <2.0.0'
 dependencies:
   browser: any
+  html5lib: any
 transformers:
 - script_inliner
 transformers:

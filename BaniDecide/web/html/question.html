@@ -4,15 +4,53 @@
   <head>
   	<meta charset="utf-8">
   	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BaniDecideQuestion</title>
+    <title>BaniDecide</title>
+    <link href="https://fonts.googleapis.com/css?family=Bree+Serif:400" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="../css/bootstrap/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="../css/semanticUI/dist/semantic.min.css" />
+    <link rel="stylesheet" type="text/css" href="../css/question.css" />
+    <link rel="stylesheet" type="text/css" href="../css/basic.css" />
+    <script src="../js/jquery-1.11.2.min.js"></script>
+    <script src="http://www.parsecdn.com/js/parse-1.3.4.min.js"></script>
+    <script src="../js/parse/parse_client.js"></script>
   </head>
   <body>
-    <form>
-       <input type="radio" name="location" value="1">Option 1<br>
-       <input type="radio" name="location" value="2">Option 2<br>
-       <input type="radio" name="location" value="3">Option 3<br>
-       <input type="radio" name="location" value="4">Option 4<br>
-</form>
+    <div id="question_container">
+      <div id="question_wrapper">
+        <span class="content"></span>
+      </div>
+      <div id ="option_wrapper">
+        <form id="options">
+          <div class="option">
+            <input type="radio" name="option" value="0">
+            <sapn class="content"></sapn>
+            <div class="count"></div>
+          </div>
+          <div class="option">
+            <input type="radio" name="option" value="1">
+            <sapn class="content"></sapn>
+            <div class="count"></div>
+          </div>
+          <div class="option">
+            <input type="radio" name="option" value="2">
+            <sapn class="content"></sapn>
+            <div class="count"></div>
+          </div>
+          <div class="option">
+            <input type="radio" name="option" value="3">
+            <sapn class="content"></sapn>
+            <div class="count"></div>
+          </div>
+        </form>
+        <div id="counts">
+          <sapn class="count number"></sapn>
+          <sapn class="count number"></sapn>
+          <sapn class="count number"></sapn>
+          <sapn class="count number"></sapn>
+        </div>
+      </div>
+    </div>
+    <div id="fb-comment-container"></div>
     <script type="application/dart" src="../dart/question.dart"></script>
     <!-- for this next line to work, your pubspec.yaml file must have a dependency on 'browser' -->
     <script src="packages/browser/dart.js"></script>

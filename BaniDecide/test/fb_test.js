@@ -1,14 +1,5 @@
 var uid;
 var accessToken;
-
-FB.init({
-  appId: '303348743168816',
-  status: true,
-  cookie: true,
-  xfbml: true,
-  oauth: true,
-  version : 'v2.2'
-});
 	
 function getLoginState() {
 	FB.getLoginStatus(function (response) {
@@ -30,7 +21,7 @@ function fb_login() {
 			accessToken = response.authResponse.accessToken;
 		}
 	}, {
-	scope: 'email,publish_stream'
+	scope: 'email,publish_stream,user_friends'
 	});
 }
 

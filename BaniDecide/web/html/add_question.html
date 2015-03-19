@@ -6,6 +6,7 @@
   	<meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BaniDecide</title>
     <link href="https://fonts.googleapis.com/css?family=Bree+Serif:400" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="../font-awesome-4.3.0/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="../css/bootstrap/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="../css/semanticUI/dist/semantic.min.css" />
     <link rel="stylesheet" type="text/css" href="../css/basic.css" />
@@ -16,16 +17,17 @@
   </head>
   <body>
     <div id="title">BanWouDecide</div>
-    <div id="question_container">
+    <div id="question-container">
       <form>
         <input type="text" id="question" class="form-control" name="question" placeholder="Enter Your Question">
         <hr style="border:1px dashed #000; width:50%">
-        <input type="text" class="form-control option" name="option1" placeholder="Enter Your Option 1"><br>
-        <input type="text" class="form-control option" name="option2" placeholder="Enter Your Option 2"><br>
-        <input type="text" class="form-control option" name="option3" placeholder="Enter Your Option 3"><br>
-        <input type="text" class="form-control option" name="option4" placeholder="Enter Your Option 4"><br><br>
+        <div class="option-wrapper">
+          <input type="text" class="form-control option" name="option" placeholder="Enter Your Option">
+          <div class="remove-button hidden"><i class="fa fa-minus-circle"></i></div>
+        </div><br>
       </form>
-      <div id="create_question" class="btn btn-default">CREATE
+      <div id="add-option">+ Add Option</div>
+      <div id="create-question" class="btn btn-default">CREATE
       <form method="post" id="send-form" accept-charset="utf-8"></form>
       <a id="jump-page" class="hidden"></a>
       </div>

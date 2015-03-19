@@ -10,18 +10,38 @@ class QuestionInput {
   TextInputElement question;
   List<TextInputElement> options = new List(DEFAULT_OPTION_NUM);
   
+  FormElement _parent;
+  DivElement _child;
   FormElement _sender;
+  DivElement _removeBtn;
   String _qid;
   
   QuestionInput() {
     question = querySelector('#question');
     options = querySelectorAll('.option');
+    _parent = querySelector('#question-container form');
+    _child = querySelector('.option-wrapper').clone(true);
     _sender = querySelector('#send-form');
-    _startSubmitListener();
+    _removeBtn = querySelector('.remove-button');
+    
+    _startRemoveListener(querySelector('.option-wrapper'));
   }
   
-  void _startSubmitListener() {
-    querySelector('#create_question').onClick.listen((_) {
+  void startAddOptionListener() {
+    querySelector('#add-option').onClick.listen((_) {
+      DivElement child = _child.clone(true);
+      (child.querySelector('input') as InputElement).value = '';
+      
+     _parent.children.insert(_parent.children.length, child);
+     _parent.children.insert(_parent.children.length, new BRElement());
+     
+     _displayRemoveBtn();
+     _startRemoveListener(child);
+    });
+  }
+  
+  void startSubmitListener() {
+    querySelector('#create-question').onClick.listen((_) {
       if (_isValidInput) {
         _addQuestion().then((response) {
           _qid = response[QUESTION_ID];
@@ -31,6 +51,26 @@ print("qid: $_qid");
             => print('fail to add question: $ex'));
       }
     });    
+  }
+  
+  void _displayRemoveBtn() {
+    List<DivElement> optionWrappers = _parent.querySelectorAll('.option-wrapper');
+    if (optionWrappers.length > 1) {
+      optionWrappers.forEach((option) {
+        option.querySelector('.remove-button').classes.remove('hidden');
+      });
+    } else {
+      optionWrappers[0].querySelector('.remove-button').classes.add('hidden');
+    }
+  }
+  
+  void _startRemoveListener(DivElement newElem) {
+    var listener;
+    listener = newElem.querySelector('.remove-button').onClick.listen((_) {
+      newElem.remove();
+      _displayRemoveBtn();
+      listener.cancel();
+    });
   }
   
   Future _addQuestion() {
@@ -77,10 +117,10 @@ class QuestionOutput {
   String uid;
   
   QuestionOutput(this.qid) {
-    question = querySelector('#question_wrapper .content');
-    optionsRadio = querySelectorAll('#option_wrapper #options input');
-    options = querySelectorAll('#option_wrapper #options .content');
-    optionsCount = querySelectorAll('#option_wrapper #options .count');
+    question = querySelector('#question-wrapper .content');
+    optionsRadio = querySelectorAll('#option-wrapper #options input');
+    options = querySelectorAll('#option-wrapper #options .content');
+    optionsCount = querySelectorAll('#option-wrapper #options .count');
   }
   
   void generate() {

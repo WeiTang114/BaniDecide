@@ -1,7 +1,26 @@
 
 var RESP_BADREQUEST = "Bad request.";
 var RESP_UNKNOWN = "Unknown Error.";
+var FB_APIURL = "https://graph.facebook.com/";
+var FB_APPID = "303348743168816";
+var FB_APPSECRET = "233b0d6c54b3393e9b5827a573184c3f";
 
+
+// general keys
+var KEY_OBJECT_ID = "objectId";
+
+// keys of User
+var KEY_FB_UID = "fbUid";
+var KEY_AUTHDATA = "authData";
+var KEY_ANSWERED_QIDS = "answeredQids";
+var KEY_ANSWERED_CNT = "answeredCount";
+
+// keys of Question
+var KEY_UID = "uid";
+var KEY_Q = "q";
+var KEY_A = "a";
+var KEY_AN = "an";
+var KEY_COUNTS = "counts";
 
 
 // Use Parse.Cloud.define to define as many cloud functions as you want.
@@ -13,12 +32,61 @@ Parse.Cloud.define("hello", function(request, response) {
 
 
 
+Parse.Cloud.define("uploadParseUser", function(request, response) {
+  var user = request.params.user;
+  var fbUid = user.authData.facebook.id;
+  var sToken = user.authData.facebook.access_token;
+
+  console.log(sToken);
+
+  
+
+
+  // exchange a short token for a long token
+  var url = FB_APIURL + "oauth/access_token?" 
+            + "grant_type=fb_exchange_token"
+            + "&client_id=" + FB_APPID
+            + "&client_secret=" + FB_APPSECRET
+            + "&fb_exchange_token=" + sToken; 
+  console.log(url);
+
+  var msg;
+  var lToken;  
+  Parse.Cloud.httpRequest({url: url}).then(function(resp) {
+    lToken = resp.text;
+    if (isNullOrUndef(lToken)) {
+      return Parse.Promise.error("long token not got");
+    }
+
+    var query = new Parse.Query(Parse.User);
+    return query.get(user.objectId);
+  }).then(function(parseUser) {
+    var answeredCnt = parseUser.get(KEY_ANSWERED_CNT);
+
+    // change the access token to be the long one
+    var authData = parseUser.get(KEY_AUTHDATA);
+    authData.facebook.access_token = lToken;     
+
+    // save fbUid in a seperate column, save authdata 
+    return parseUser.save({
+      KEY_FB_UID: fbUid,
+      KEY_AUTHDATA: authData,
+      KEY_ANSWERED_CNT: isNullOrUndef(answeredCnt) ? 0 : answeredCnt
+    });
+  }).then(function(resp) {
+    response.success(resp);
+  }, function(error) {
+    response.error(error);
+  }); 
+});
+
+
 /**
  * get a question's data, including items and their numbers
  * 
  * request: {"qid":qid}
  * response: 
- *   success: {"q":q, "a":[a, b, c, d], "counts":[n1, n2, n3, n4]}
+ *   success: {"uid":uid, "q":q, "a":[a, b, c, d], "an":an, "counts":[n1, n2, n3, n4]}
  *   fail: "message"
  */
 Parse.Cloud.define("getQuestion", function(request, response) {
@@ -33,11 +101,12 @@ Parse.Cloud.define("getQuestion", function(request, response) {
   var Question = Parse.Object.extend("Question");
   var query = new Parse.Query(Question);
   query.get(qid).then(function(question) {
-    var qJSON = question.toJSON();
     var qResp = {
-      q: qJSON.q,
-      a: qJSON.a,
-      counts: qJSON.counts,
+      uid:    question.get(KEY_FB_UID),
+      q:      question.get(KEY_Q),
+      a:      question.get(KEY_A),
+      an:     question.get(KEY_AN),
+      counts: question.get(KEY_COUNTS),
     }
     response.success(JSON.stringify(qResp));
   }, function(error) {
@@ -49,24 +118,31 @@ Parse.Cloud.define("getQuestion", function(request, response) {
 /**
  * add a new question
  * 
- * request:  {"q":q, "a":[q, a, b, c, d]}
+ * request:  {“uid":uid, "q":q, "a":[q, a1, a2...,an], "an":an}
  * response: 
  *   success: {"qid":qid}  
  *   fail: "message"
  */
 Parse.Cloud.define("addQuestion", function(request, response) {
+  var uid = request.params.uid;
   var q = request.params.q;
   var a = request.params.a;
+  var an = request.params.an;
   if (isNullOrUndef(q) || isNullOrUndef(a) || a.length != 4) {
-    response.error(RESP_BADREQUEST + 'correct: {"q":q, "a":[a1,a2,a3,a4]}');
+    response.error(RESP_BADREQUEST + '{“uid":uid, "q":q, "a":[q, a1, a2...,an], "an":an}');
     return;
+  }
+  if (isNullOrUndef(an)) {
+    an = a.length;
   }
 
   var Question = Parse.Object.extend("Question");
   var question = new Question();
-  question.set("q", q)
-  question.set("a", a);
-  question.set("counts", [0, 0, 0, 0]);
+  question.set(KEY_UID, uid);
+  question.set(KEY_Q, q)
+  question.set(KEY_A, a);
+  question.set(KEY_AN, an);
+  question.set(KEY_COUNTS, Array.apply(null, new Array(an)).map(Number.prototype.valueOf,0));
   question.save(null).then(function(qAgain) {
     var qid = qAgain.id;
     response.success(JSON.stringify({"qid":qid}));
@@ -89,6 +165,7 @@ Parse.Cloud.define("selectItem", function(request, response) {
   var uid = request.params.uid;
   var qid = request.params.qid;
   var number = request.params.number;
+  var Question = Parse.Object.extend("Question");
 
   // check request
   if (isNullOrUndef(uid) || 
@@ -98,53 +175,39 @@ Parse.Cloud.define("selectItem", function(request, response) {
     return;
   }
 
-  var MyUser = Parse.Object.extend("MyUser");
-  var query = new Parse.Query(MyUser);
-  var myUser;
+  var query = new Parse.Query(Parse.User);
+  var user;
   var qJSON;
-  query.equalTo("uid", uid);
-  query.find().then(function(myUserList) {
-    console.log("myUserList:" + JSON.stringify(myUserList));
-
-    // user not exist yet
-    if (myUserList.length == 0) {
-      var newUser = new MyUser();
-      newUser.set("uid", uid);
-      newUser.set("answeredQids", []);
-      return newUser.save(null);
-    }
-
-    myUser = myUserList[0];
+  query.get(id).then(function(user) {
+    console.log("user:" + JSON.stringify(user.toJSON()));
 
     // check if he/she has voted!
-    if (myUser.toJSON().answeredQids.indexOf(qid) >= 0) {
+    if (user.get(KEY_ANSWERED_QIDS).indexOf(qid) >= 0) {
       return Parse.Promise.error("You have voted!");
     }
-  }).then(function(newUserAgain){
-    // new user added
-    if (!isNullOrUndef(newUserAgain)) {
-      myUser = newUserAgain;
-      console.log("myUser = " + newUserAgain);
-    }
-    // select!
-    var Question = Parse.Object.extend("Question");
+
+    // select!  
     query = new Parse.Query(Question);
     return query.get(qid);
   }).then(function(question) {
-    if (number < 0 || number > 3) {
-      return Parse.Promise.error("number is not between 0 and 3, number = " + number);
+    if (number < 0 || number > question.get(KEY_AN) - 1) {
+      return Parse.Promise.error("number is not between 0 and an(" + question.get(KEY_AN) - 1 + "), number = " + number);
     }
 
     // get question object
     qJSON = question.toJSON();
     console.log("item number ++");
-    qJSON.counts[number] ++;
-    return question.save({counts: qJSON.counts});
+    qJSON[KEY_COUNTS][number] ++;
+    return question.save({KEY_COUNTS: qJSON.counts});
   }).then(function(qAgain) {
     // question item seleted
-    var myUJSON = myUser.toJSON();
-    myUJSON.answeredQids.push(qid);
-    return myUser.save({answeredQids: myUJSON.answeredQids});
+    var userJSON = user.toJSON();
+    userJSON[KEY_ANSWERED_QIDS].push(qid);
+    userJSON[KEY_ANSWERED_CNT]++;
+    return myUser.save({
+      KEY_ANSWERED_QIDS: myUJSON.answeredQids,
+      KEY_ANSWERED_CNT : myUJSON.answeredCnt
+    });
   }).then(function(results){
     // done
     response.success(JSON.stringify({counts:qJSON.counts}));
@@ -153,6 +216,121 @@ Parse.Cloud.define("selectItem", function(request, response) {
     response.error(error);
   });
 });
+
+
+
+var TYPE_FRIEND_ASKED = "friends_asked";
+var TYPE_FRIEND_ANSWERED = "friends_answered";
+/**
+ * get other questions of some certain types, eg. those your friends asked or answered
+ * request   {"uid":uid, "access_token":access_token, type":type, "count":count}
+ *           type: either "friends_asked" or "friends_answered"
+ * response  
+ *    success: {"count":count, "questions":questions}
+ *    fail:    {"failtype":failtype}
+ *
+ *       questions:[q1, q2, q3 ... qn]
+ *       qi: {"uid":askuid, "qid":qid, "q":q, "a":a, "an":an, "counts":counts}
+ */
+Parse.Cloud.define("getOtherQuestions", function(request, response) {
+  var uid       = request.params.uid;
+  var type      = request.params.type;
+  var count     = request.params.count;
+  var Question  = Parse.Object.extend("Question");
+  var questions;
+
+  // check request
+  if (isNullOrUndef(uid) || 
+      isNullOrUndef(type) ||
+      isNullOrUndef(count)) {
+    response.error(RESP_BADREQUEST + 'correct: {"uid":uid, "type":type, "count":count}');
+    return;
+  }
+
+  // check "type" argument
+  if (type != TYPE_FRIEND_ANSWERED && type != TYPE_FRIEND_ASKED) {
+    response.error("Unknown type:" + type);
+    return;
+  }
+
+  // query user
+  var query = new Parse.Query(Parse.User);
+  query.get(uid).then(function(user) {
+    var fbUser = user.get("authData").facebook;
+    var userId = user.get("authData").facebook.access
+    var url = FB_APIURL + fbUser.id
+              + "/friends?" 
+              + "access_token=" + fbUser.access_token;
+
+    // request facebook for using friends
+    return Parse.Cloud.httpRequest({url:url});
+  }).then(function(resp) {
+    console.log("facebook response:" + resp);
+    var friends = JSON.parse(resp);
+    var fIds = [];
+    for (f in friends) {
+      fIds.push(f.id);
+    }
+
+    // two types!
+    if (type == TYPE_FRIEND_ASKED) {
+      query = new Parse.Query(Question);
+      query.containedIn(KEY_UID, fIds);
+      return query.find();
+    }
+    else if (type == TYPE_FRIEND_ANSWERED) {
+      query = new Parse.Query(Parse.User);
+      query.containedIn(KEY_FB_UID, fIds);
+      query.greaterThan(KEY_ANSWERED_CNT, 0);
+      return query.find();
+    }
+  }).then(function(resp) {
+    if (type == TYPE_FRIEND_ASKED) {
+      questions = resp;
+      return Parse.Promise.as();
+    }
+    else if (type == TYPE_FRIEND_ANSWERED) {  
+      var answeredFriends = resp;
+      var qids = [];
+      for (f in answeredFriends) {
+        for (qid in answeredFriends[KEY_ANSWERED_QIDS]) {
+          qids.push(qid);
+        }
+      }
+      query = new Parse.Query(Question);
+      query.containedIn(KEY_OBJECT_ID, qids);
+      return query.find();
+    }
+  }).then(function(resp) {
+    if (type == TYPE_FRIEND_ASKED) {
+      return Parse.Promise.as();
+    }
+    else if (type == TYPE_FRIEND_ANSWERED) {  
+      questions = resp;
+      return Parse.PRomise.as();
+    }    
+  }).then(function(resp) {
+    var qRet = [];
+    var cntRet = 0;
+    for (var i = 0; i < count; i++, cntRet++) {
+      var q = questions[i].toJSON();
+      qRet.push({
+        uid: q.uid,
+        qid: q.objectId,
+        q: q.q,
+        a: q.a,
+        counts: q.counts
+      });
+    }
+
+    response.success(JSON.stringify({count: cntRet, questions: qRet}));
+  }, function(error) {
+
+    response.error(JSON.stringify(error));
+  });
+});
+
+
 
 
 

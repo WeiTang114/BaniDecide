@@ -6,6 +6,18 @@ import "dart:js" as js;
 
 import '../generic/field_name.dart';
 
+
+Future checkLoggedIn() {
+  print('checkLoggedIn called');
+
+  final Completer cmpl = new Completer();
+  var ok = (response) => cmpl.complete(response.toString() == '1');
+  var fail = (error) => cmpl.completeError(error);
+  js.context.callMethod('getLoginState', [ok, fail]);
+  return cmpl.future;
+}
+
+
 class QuestionInput {
   TextInputElement question;
   //List<TextInputElement> options = new List(DEFAULT_OPTION_NUM);
@@ -48,7 +60,7 @@ class QuestionInput {
         return;
       }
       
-      _checkLoggedIn()
+      checkLoggedIn()
           .then((loggedIn) {
             print('loggedIn $loggedIn');
             if (loggedIn)
@@ -134,31 +146,6 @@ class QuestionInput {
     js.context.callMethod('getLoginState', [ok, fail]);
     return cmpl.future;
   }
-
-  bool get _isLoggedin {
-    // final Completer cmpl = new Completer();
-    
-    // var ok = (response) => cmpl.complete(response);
-    // var fail = (error) => cmpl.completeError(error);
-    // js.context.callMethod('getQuestion', [qid, ok, fail]);
-    
-    // return cmpl.future;
-
-    
-    Future<bool> future = new Future.sync(() {
-      final Completer cmpl = new Completer();
-      var ok = (response) => cmpl.complete(response);
-      var fail = (error) => cmpl.completeError(error);
-      js.context.callMethod('getLoginState', [ok, fail]);
-      return cmpl.future;
-    });
-
-    return (cmpl.future.sync()).toString() == '1';
-
-    // int ret = js.context.callMethod('getLoginState');
-    // print('_isLoggedin ' + ret.toString());
-    // return ret.toString() == '1';
-  }
 }
 
 
@@ -219,16 +206,32 @@ class QuestionOutput {
   Future _selectItem() {
     final Completer cmpl = new Completer();
 
-    if (!_isLoggedin) {
-      print("Please login first!");
-      js.context.callMethod('fb_login');
-    } else {
-      uid = js.context['uid'].toString();
-      print('uid: $uid');
-      var ok = (response) => cmpl.complete(response);
-      var fail = (error) => cmpl.completeError(error);
-      js.context.callMethod('selectItem', [uid, qid, _selectedOption, ok, fail]);
-    }
+    checkLoggedIn()
+        .then((loggedIn) {
+          if (!loggedIn) {
+            print("Please login first!");
+            js.context.callMethod('fb_login');      
+          }
+          else {
+            uid = js.context['uid'].toString();
+            print('uid: $uid');
+            var ok = (response) => cmpl.complete(response);
+            var fail = (error) => cmpl.completeError(error);
+            js.context.callMethod('selectItem', [qid, _selectedOption, ok, fail]);
+          }
+        });
+
+
+    // if (!_isLoggedin) {
+    //   print("Please login first!");
+    //   js.context.callMethod('fb_login');
+    // } else {
+    //   uid = js.context['uid'].toString();
+    //   print('uid: $uid');
+    //   var ok = (response) => cmpl.complete(response);
+    //   var fail = (error) => cmpl.completeError(error);
+    //   js.context.callMethod('selectItem', [uid, qid, _selectedOption, ok, fail]);
+    // }
     return cmpl.future;
   }
   

@@ -29,7 +29,7 @@ function fb_login() {
 		  if (!user.existed()) {
 		    console.log("User signed up and logged in through Facebook!");
 		  } else {
-		    consolg.log("User logged in through Facebook!");
+		    console.log("User logged in through Facebook!");
 		  }
 		  console.log(JSON.stringify(user));
 

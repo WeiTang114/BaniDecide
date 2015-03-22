@@ -1,14 +1,6 @@
 var uid;
 var accessToken;
 
-FB.init({
-  appId: '303348743168816',
-  status: true,
-  cookie: true,
-  xfbml: true,
-  version : 'v2.2'
-});
-	
 function getLoginState() {
 	FB.getLoginStatus(function (response) {
 		if (response.status === 'connected') {      
@@ -23,13 +15,24 @@ function getLoginState() {
 }
 
 function fb_login() {
-	FB.login(function(response) {
-		if (response.authResponse) {
-			uid = response.authResponse.userID;
-			accessToken = response.authResponse.accessToken;
+	var scope = 'email,publish_stream,user_friends';
+
+  initParse();
+	Parse.FacebookUtils.logIn(scope, {
+		success: function(user) {
+		  if (!user.existed()) {
+		    alert("User signed up and logged in through Facebook!");
+		  } else {
+		    alert("User logged in through Facebook!");
+		  }
+		  console.log(JSON.stringify(user));
+
+      uid = user.get("authData").facebook.id;
+      accessToken = user.get("authData").facebook.access_token;
+		},
+		error: function(user, error) {
+		  alert("User cancelled the Facebook login or did not fully authorize.");
 		}
-	}, {
-	scope: 'email,publish_stream'
 	});
 }
 

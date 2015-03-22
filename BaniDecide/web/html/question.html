@@ -20,18 +20,20 @@
     <div id="fb-root"></div>
       <script>
         window.fbAsyncInit = function() {
-          FB.init({
-            appId      : '303348743168816',
-            xfbml      : true,
-            version    : 'v2.0',
-            oauth      : true,
+          initParse();
+          Parse.FacebookUtils.init({ // this line replaces FB.init({
+            appId      : '303348743168816', // Facebook App ID
+            status     : true,  // check Facebook Login status
+            cookie     : true,  // enable cookies to allow Parse to access the session
+            xfbml      : true,  // initialize Facebook social plugins on the page
+            version    : 'v2.2' // point to the latest Facebook Graph API version
           });
         };
         (function(d, s, id) {
           var js, fjs = d.getElementsByTagName(s)[0];
           if (d.getElementById(id)) return;
           js = d.createElement(s); js.id = id;
-          js.src = "//connect.facebook.net/zh_TW/sdk.js#xfbml=1&appId=303348743168816&version=v2.0";
+          js.src = "http://connect.facebook.net/zh_TW/sdk.js";
           fjs.parentNode.insertBefore(js, fjs);
         }(document, 'script', 'facebook-jssdk'));
       </script>

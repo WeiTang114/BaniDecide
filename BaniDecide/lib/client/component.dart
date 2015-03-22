@@ -109,27 +109,34 @@ print("qid: $_qid");
 
 class QuestionOutput {
   SpanElement question;
-  List<RadioButtonInputElement> optionsRadio = new List(DEFAULT_OPTION_NUM);
-  List<SpanElement> options = new List(DEFAULT_OPTION_NUM);
-  List<DivElement> optionsCount = new List(DEFAULT_OPTION_NUM);
+  List<RadioButtonInputElement> optionsRadio;
+  List<SpanElement> options;
+  List<DivElement> optionsCount;
   
   String qid;
   String uid;
-  
+  int ansCount;
+
   QuestionOutput(this.qid) {
     question = querySelector('#question-wrapper .content');
-    optionsRadio = querySelectorAll('#option-wrapper #options input');
-    options = querySelectorAll('#option-wrapper #options .content');
-    optionsCount = querySelectorAll('#option-wrapper #options .count');
   }
   
   void generate() {
     _getQuestion().then((response) {
       question.text = response[QUESTION_CONTENT];
-      for (int i = 0; i < DEFAULT_OPTION_NUM; i++) {
+      ansCount = response[AN];
+
+      optionsRadio = new List(ansCount);
+      options = new List(ansCount);
+      optionsCount = new List(ansCount);
+      optionsRadio = querySelectorAll('#option-wrapper #options input');
+      options = querySelectorAll('#option-wrapper #options .content');
+      optionsCount = querySelectorAll('#option-wrapper #options .count');
+      for (int i = 0; i < ansCount; i++) {
         options[i].text = response[QUESTION_OPTIONS][i].toString();
         optionsCount[i].text = response[OPTIONS_COUNTS][i].toString() + ' 票';
       }  
+      startSelectListener();
     }).catchError((ex)
         => print('fail to generate question: $ex'));
   }
@@ -141,7 +148,7 @@ class QuestionOutput {
   }
   void _select() {
     _selectItem().then((response) {
-      for (int i = 0; i < DEFAULT_OPTION_NUM; i++) 
+      for (int i = 0; i < ansCount; i++) 
         optionsCount[i].text = response[OPTIONS_COUNTS][i].toString() + ' 票';
     }).catchError((ex)
         => print('fail to select option: $ex'));
@@ -174,7 +181,7 @@ class QuestionOutput {
   }
   
   int get _selectedOption {
-    for (int i = 0; i < DEFAULT_OPTION_NUM; i++) {
+    for (int i = 0; i < ansCount; i++) {
       if (optionsRadio[i].checked)
         return i;
     }

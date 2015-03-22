@@ -8,6 +8,9 @@ function initParse() {
   if (isNullOrUndef(Parse)) {
     console.error("'Parse' is undefined. Please check if you've added PARSE SDK into your html file.");
   }
+  if (init) {
+    return;
+  }
 
   var appId = "EeGKlcEmDhT5SMjQhs6iRaYdIIohsM6rGWNn9iP2";
   var jsKey = "CEnbro29EZJaKvRqIdpH46yaJcfk8UTdEspS5Qrm";

@@ -9,3 +9,4 @@ const String QUESTION_CONTENT = "q";
 const String QUESTION_OPTIONS = "a";
 const String OPTIONS_COUNTS = "counts";
 const String FAIL_TYPE = "failtype";
+const String AN = "an";

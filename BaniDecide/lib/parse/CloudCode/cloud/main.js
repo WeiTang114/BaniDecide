@@ -125,7 +125,7 @@ Parse.Cloud.define("getQuestion", function(request, response) {
 /**
  * add a new question
  * 
- * request:  {“uid":uid, "q":q, "a":[q, a1, a2...,an], "an":an}
+ * request:  {“uid":uid, "q":q, "a":[a1, a2...,an], "an":an}
  * response: 
  *   success: {"qid":qid}  
  *   fail: "message"
@@ -135,7 +135,7 @@ Parse.Cloud.define("addQuestion", function(request, response) {
   var q = request.params.q;
   var a = request.params.a;
   var an = request.params.an;
-  if (isNullOrUndef(q) || isNullOrUndef(a) || a.length != 4) {
+  if (isNullOrUndef(q) || isNullOrUndef(a)) {
     response.error(RESP_BADREQUEST + '{“uid":uid, "q":q, "a":[q, a1, a2...,an], "an":an}');
     return;
   }

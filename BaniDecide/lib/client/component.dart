@@ -8,7 +8,7 @@ import '../generic/field_name.dart';
 
 class QuestionInput {
   TextInputElement question;
-  List<TextInputElement> options = new List(DEFAULT_OPTION_NUM);
+  //List<TextInputElement> options = new List(DEFAULT_OPTION_NUM);
   
   FormElement _parent;
   DivElement _child;
@@ -18,12 +18,12 @@ class QuestionInput {
   
   QuestionInput() {
     question = querySelector('#question');
-    options = querySelectorAll('.option');
+    //options = querySelectorAll('.option');
     _parent = querySelector('#question-container form');
     _child = querySelector('.option-wrapper').clone(true);
     _sender = querySelector('#send-form');
     _removeBtn = querySelector('.remove-button');
-    
+
     _startRemoveListener(querySelector('.option-wrapper'));
   }
   
@@ -40,16 +40,29 @@ class QuestionInput {
     });
   }
   
+
   void startSubmitListener() {
     querySelector('#create-question').onClick.listen((_) {
-      if (_isValidInput) {
-        _addQuestion().then((response) {
-          _qid = response[QUESTION_ID];
-print("qid: $_qid");
-          _jumpPage();
-        }).catchError((ex)
-            => print('fail to add question: $ex'));
+      if (!_isValidInput) {
+        print('inpud is invalid.');
+        return;
       }
+      
+      _checkLoggedIn()
+          .then((loggedIn) {
+            print('loggedIn $loggedIn');
+            if (loggedIn)
+              _addQuestion();
+            else {                
+              print('Please login first!');
+              js.context.callMethod('fb_login');
+            }
+          }).then((response) {
+            _qid = response[QUESTION_ID];
+            print("qid: $_qid");
+            _jumpPage();
+          }).catchError((ex)
+            => print('fail to add question: $ex'));
     });    
   }
   
@@ -92,17 +105,59 @@ print("qid: $_qid");
   String get _q => question.value;
   
   List<String> get _ans {
-    List<String> a = new List(DEFAULT_OPTION_NUM);
-    for (int i = 0; i < DEFAULT_OPTION_NUM; i++)
-      a[i] = options[i].value;
+    List<String> a = new List(_ansCount);
+    for (int i = 0; i < _ansCount; i++)
+      a[i] = _options[i].value;
     return a;
   }
   
   bool get _isValidInput {
     if (_q.isEmpty) return false;
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < _ansCount; i++)
       if (_ans[i].isEmpty) return false;
     return true;
+  }
+
+  List<TextInputElement> get _options 
+    => querySelectorAll('.option');
+
+  int get _ansCount 
+    => _options.length;
+
+
+  Future _checkLoggedIn() {
+    print('checkLoggedIn called');
+
+    final Completer cmpl = new Completer();
+    var ok = (response) => cmpl.complete(response.toString() == '1');
+    var fail = (error) => cmpl.completeError(error);
+    js.context.callMethod('getLoginState', [ok, fail]);
+    return cmpl.future;
+  }
+
+  bool get _isLoggedin {
+    // final Completer cmpl = new Completer();
+    
+    // var ok = (response) => cmpl.complete(response);
+    // var fail = (error) => cmpl.completeError(error);
+    // js.context.callMethod('getQuestion', [qid, ok, fail]);
+    
+    // return cmpl.future;
+
+    
+    Future<bool> future = new Future.sync(() {
+      final Completer cmpl = new Completer();
+      var ok = (response) => cmpl.complete(response);
+      var fail = (error) => cmpl.completeError(error);
+      js.context.callMethod('getLoginState', [ok, fail]);
+      return cmpl.future;
+    });
+
+    return (cmpl.future.sync()).toString() == '1';
+
+    // int ret = js.context.callMethod('getLoginState');
+    // print('_isLoggedin ' + ret.toString());
+    // return ret.toString() == '1';
   }
 }
 
@@ -126,9 +181,6 @@ class QuestionOutput {
       question.text = response[QUESTION_CONTENT];
       ansCount = response[AN];
 
-      optionsRadio = new List(ansCount);
-      options = new List(ansCount);
-      optionsCount = new List(ansCount);
       optionsRadio = querySelectorAll('#option-wrapper #options input');
       options = querySelectorAll('#option-wrapper #options .content');
       optionsCount = querySelectorAll('#option-wrapper #options .count');
@@ -189,7 +241,7 @@ class QuestionOutput {
   }
   
   bool get _isLoggedin
-    => js.context.callMethod('getLoginState').toString() != '3';
+    => js.context.callMethod('getLoginState').toString() == '1';
 }
 
 

@@ -1,29 +1,35 @@
 var uid;
 var accessToken;
 
-function getLoginState() {
+function getLoginState(onSuccess, onFail) {
 	FB.getLoginStatus(function (response) {
-		if (response.status === 'connected') {      
+    console.log('getLoginState: status:' + response.status);
+		if (response.status === 'connected') {
 			uid = response.authResponse.userID;
-			return 1;
-		} else if (response.status === 'not_authorized')
-			return 2;
-		else 
-			return 3;
-	})
-
+			onSuccess(1);
+      return;
+		} else if (response.status === 'not_authorized') {
+			onSuccess(2);
+      return;
+    } else { 
+			onSuccess(3);
+      return;
+    }
+    onFail('onknown facebook login status:' + response.status);
+	});
 }
 
 function fb_login() {
+  console.log('fb_login called');
 	var scope = 'email,publish_stream,user_friends';
 
   initParse();
-	Parse.FacebookUtils.logIn(scope, {
+	Parse.FacebookUtils.logIn(null, {
 		success: function(user) {
 		  if (!user.existed()) {
-		    alert("User signed up and logged in through Facebook!");
+		    console.log("User signed up and logged in through Facebook!");
 		  } else {
-		    alert("User logged in through Facebook!");
+		    consolg.log("User logged in through Facebook!");
 		  }
 		  console.log(JSON.stringify(user));
 
@@ -31,7 +37,8 @@ function fb_login() {
       accessToken = user.get("authData").facebook.access_token;
 		},
 		error: function(user, error) {
-		  alert("User cancelled the Facebook login or did not fully authorize.");
+      console.log(error);
+		  console.log("User cancelled the Facebook login or did not fully authorize.");
 		}
 	});
 }

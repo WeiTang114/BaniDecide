@@ -31,7 +31,7 @@ function uploadParseUser(onSuccess, onFailure) {
   }
 
   Parse.Cloud.run("uploadParseUser", {
-    user:Parse.User.current().toJSON();
+    user:Parse.User.current().toJSON()
   }).then(function(response) {
     onSuccess("OK");
   }, function(error) {
@@ -43,7 +43,7 @@ function uploadParseUser(onSuccess, onFailure) {
 /**
  * getQuestion. initParse() is required to be called before getQuestion().
  * @param  {string} qid       the qid of the question you are getting
- * @param  {function} onSuccess function({q:q, a:a, counts:counts})
+ * @param  {function} onSuccess function({fbUid:fbUid, q:q, a:a, an:an, counts:counts})
  * @param  {function} onFailure function({failtype:"errrrr"})
  * @return {[type]}           [description]
  */
@@ -56,7 +56,13 @@ function getQuestion(qid, onSuccess, onFailure) {
     var resp = JSON.parse(respStr);
     console.log("question:" + resp.q + ", options:" + resp.a + ", counts:" + resp.counts);
     
-    onSuccess({q:resp.q, a:resp.a, counts: resp.counts});
+    onSuccess({
+      fbUid:  resp.fbUid, 
+      q:      resp.q, 
+      a:      resp.a, 
+      an:     resp.an,
+      counts: resp.counts
+    });
   }, function(error) {
     console.log(JSON.stringify(error));
     if (!isNullOrUndef(error.message)) {
@@ -89,12 +95,12 @@ function addQuestion(question, answers, onSuccess, onFailure) {
   }
 
   // add question
-  Parse.Cloud.run("addQuestion", 
-      {uid:Parse.User.current().id, 
-       q: question, 
-       a: answers, 
-       an:a.length})
-  .then(function(respStr) {
+  Parse.Cloud.run("addQuestion", {
+    uid:Parse.User.current().id, 
+    q: question, 
+    a: answers, 
+    an:answers.length
+  }).then(function(respStr) {
     var resp = JSON.parse(respStr);
     console.log("new qid=" + resp.qid);
     onSuccess({qid:resp.qid});
@@ -152,7 +158,19 @@ function selectItem(qid, number, onSuccess, onFailure) {
   });
 }
 
-
+/**
+ * get 2 type of list of questions: "friends_asked" or "friends_answered"
+ * Facebook permission: "user_friends" is required. (got when log in)
+ * 
+ * @param  {string} type       "friends_asked" or "friends_answered"
+ * @param  {int}    count      limit of the number of questions you want. 
+ *                             the returned questions will be no more than "count"
+ * @param  {func}   onSuccess  func({questions:[q1, q2,..], count: count})
+ *                             qi: {fbUid:fbUid, q:q, a:a, an:an, counts:counts}
+ *                             count: the number of returned questions
+ * @param  {func}   onFailure  func({failtype:string msg})
+ * @return {void}
+ */
 function getOtherQuestions(type, count, onSuccess, onFailure) {
     if (!init) {
     initParse();

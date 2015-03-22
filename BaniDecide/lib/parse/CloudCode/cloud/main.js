@@ -2,8 +2,15 @@
 var RESP_BADREQUEST = "Bad request.";
 var RESP_UNKNOWN = "Unknown Error.";
 var FB_APIURL = "https://graph.facebook.com/";
+
+// DIDADIDI
 var FB_APPID = "303348743168816";
 var FB_APPSECRET = "233b0d6c54b3393e9b5827a573184c3f";
+
+// qrdota_test
+// var FB_APPID = "522857694518715";
+// var FB_APPSECRET = "61c4853d2944845fcfcbfa9908c42864";
+
 
 
 // general keys
@@ -102,7 +109,7 @@ Parse.Cloud.define("getQuestion", function(request, response) {
   var query = new Parse.Query(Question);
   query.get(qid).then(function(question) {
     var qResp = {
-      uid:    question.get(KEY_FB_UID),
+      fbUid:  question.get(KEY_FB_UID),
       q:      question.get(KEY_Q),
       a:      question.get(KEY_A),
       an:     question.get(KEY_AN),
@@ -256,17 +263,19 @@ Parse.Cloud.define("getOtherQuestions", function(request, response) {
   // query user
   var query = new Parse.Query(Parse.User);
   query.get(uid).then(function(user) {
+    console.log("queried ParseUser " + user.toString());
     var fbUser = user.get("authData").facebook;
-    var userId = user.get("authData").facebook.access
     var url = FB_APIURL + fbUser.id
               + "/friends?" 
               + "access_token=" + fbUser.access_token;
 
+    console.log("requesting facebook:" + url);
+
     // request facebook for using friends
     return Parse.Cloud.httpRequest({url:url});
   }).then(function(resp) {
-    console.log("facebook response:" + resp);
-    var friends = JSON.parse(resp);
+    console.log("facebook response:" + JSON.stringify(resp));
+    var friends = resp;
     var fIds = [];
     for (f in friends) {
       fIds.push(f.id);
@@ -285,6 +294,7 @@ Parse.Cloud.define("getOtherQuestions", function(request, response) {
       return query.find();
     }
   }).then(function(resp) {
+    console.log("aaabb " + resp);
     if (type == TYPE_FRIEND_ASKED) {
       questions = resp;
       return Parse.Promise.as();
@@ -302,12 +312,13 @@ Parse.Cloud.define("getOtherQuestions", function(request, response) {
       return query.find();
     }
   }).then(function(resp) {
+    console.log("cccdd " + resp);
     if (type == TYPE_FRIEND_ASKED) {
       return Parse.Promise.as();
     }
     else if (type == TYPE_FRIEND_ANSWERED) {  
       questions = resp;
-      return Parse.PRomise.as();
+      return Parse.Promise.as();
     }    
   }).then(function(resp) {
     var qRet = [];
@@ -315,11 +326,11 @@ Parse.Cloud.define("getOtherQuestions", function(request, response) {
     for (var i = 0; i < count; i++, cntRet++) {
       var q = questions[i].toJSON();
       qRet.push({
-        uid: q.uid,
-        qid: q.objectId,
-        q: q.q,
-        a: q.a,
-        counts: q.counts
+        fbUid:  q[KEY_FB_UID],
+        qid:    q[KEY_OBJECT_ID],
+        q:      q[KEY_Q],
+        a:      q[KEY_A],
+        counts: q[KEY_COUNTS]
       });
     }
 

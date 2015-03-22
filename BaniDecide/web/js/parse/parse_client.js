@@ -166,7 +166,7 @@ function selectItem(qid, number, onSuccess, onFailure) {
  * @param  {int}    count      limit of the number of questions you want. 
  *                             the returned questions will be no more than "count"
  * @param  {func}   onSuccess  func({questions:[q1, q2,..], count: count})
- *                             qi: {fbUid:fbUid, q:q, a:a, an:an, counts:counts}
+ *                             qi: {fbUid:fbUid, qid:qid, q:q, a:a, an:an, counts:counts}
  *                             count: the number of returned questions
  * @param  {func}   onFailure  func({failtype:string msg})
  * @return {void}

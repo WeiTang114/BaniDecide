@@ -237,7 +237,7 @@ var TYPE_FRIEND_ANSWERED = "friends_answered";
  *    fail:    {"failtype":failtype}
  *
  *       questions:[q1, q2, q3 ... qn]
- *       qi: {"uid":askuid, "qid":qid, "q":q, "a":a, "an":an, "counts":counts}
+ *       qi: {"fbUid":fbUid, "qid":qid, "q":q, "a":a, "an":an, "counts":counts}
  */
 Parse.Cloud.define("getOtherQuestions", function(request, response) {
   var uid       = request.params.uid;

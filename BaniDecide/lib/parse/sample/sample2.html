@@ -1,0 +1,155 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Sample</title>
+
+  <!-- SDK dependency -->
+  <script src="http://www.parsecdn.com/js/parse-1.3.4.min.js"></script>
+  <script src="parse_client.js"></script>
+</head>
+
+<body>
+  <script>
+    initParse();
+  </script>
+
+
+  請開啟console並配合code~
+
+  <div>
+    <button onclick="logout()">logout</button>
+  </div>
+  <div>
+    <button onclick="testGetQuestion()">TestGetQuestion</button>
+  </div>
+  <div>
+    <button onclick="testAddQuestion()">TestAddQuestion</button>
+  </div>
+  <div>
+    <button onclick="testSelectItem()">TestSelectItem</button>
+  </div>
+  <div>
+    <button onclick="testGetOtherQuestions()">GetOtherQuestions</button>
+  </div>
+  <p id="p1">Result will be shown here</p>
+  <script>
+    function showResult(txt) {
+      document.getElementById("p1").innerHTML = txt;
+    }
+
+    function testGetQuestion() {
+      var qid = "Vl3I63WV9q";
+      getQuestion(qid, function(resp) {
+        showResult("Question: " + resp.q + ", options:" + resp.a + ", " + resp.counts);
+      }, function (resp) {
+        console.log(JSON.stringify(resp));
+        showResult(resp.failtype);
+      });
+    }
+
+    function testAddQuestion() {
+      var q = "新年快樂";
+      var a = ["快樂", "不快樂", "很爽", "沒差吧"];
+      addQuestion(q, a, function(resp) {
+        showResult("New qid: " + resp.qid);
+      }, function (resp) {
+        showResult(resp.failtype);
+      });
+    }
+
+    function testSelectItem() {
+      var qid = "s9Xpx3W4AZ"; // 和testGetQUestion同一題
+      var number = 0;  // 0~3
+      selectItem(qid, number, function(resp) {
+        showResult("New counts: " + resp.counts);
+      }, function (resp) {
+        showResult(resp.failtype);
+      });
+    }
+
+    function testGetOtherQuestions() {
+      getOtherQuestions("friends_asked", 3, function(resp) {
+        showResult(JSON.stringify(resp));
+      }, function(errmsg) {
+        showResult(resp.failtype);
+      });
+
+
+    }
+
+
+
+    window.fbAsyncInit = function() {
+      Parse.FacebookUtils.init({ // this line replaces FB.init({
+        appId      : '522857694518715', // Facebook App ID
+        status     : true,  // check Facebook Login status
+        cookie     : true,  // enable cookies to allow Parse to access the session
+        xfbml      : true,  // initialize Facebook social plugins on the page
+        version    : 'v2.2' // point to the latest Facebook Graph API version
+      });
+
+
+      FB.getLoginStatus(function(response) {
+        if (response.status === 'connected') {
+          // the user is logged in and has authenticated your
+          // app, and response.authResponse supplies
+          // the user's ID, a valid access token, a signed
+          // request, and the time the access token 
+          // and signed request each expire
+          var uid = response.authResponse.userID;
+          var accessToken = response.authResponse.accessToken;
+          console.log("connected!, response:" + JSON.stringify(response));
+
+          doAfterLogginIn();
+        } else { // if (response.status === 'not_authorized') {
+          console.log("not yet connected!");
+          Parse.FacebookUtils.logIn(null, {
+            success: function(user) {
+              if (!user.existed()) {
+                alert("User signed up and logged in through Facebook!");
+              } else {
+                alert("User logged in through Facebook!");
+              }
+              console.log(JSON.stringify(user));
+
+              doAfterLogginIn();
+
+            },
+            error: function(user, error) {
+              alert("User cancelled the Facebook login or did not fully authorize.");
+            }
+          });
+        }
+      });
+    };
+
+    function doAfterLogginIn() {
+      uploadParseUser(function(resp) {
+        console.log(resp);
+      }, function(errmsg) {
+        console.log(errmsg);
+      });
+
+    }     
+
+
+    function logout() {
+      FB.logout();
+    }
+
+    (function(d, s, id){
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) {return;}
+      js = d.createElement(s); js.id = id;
+      js.src = "http://connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+
+  </script>
+
+
+
+</body>
+</html> 

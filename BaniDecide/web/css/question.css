@@ -1,0 +1,52 @@
+#question-wrapper, #option-wrapper, #fb-comment-container {
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#question-wrapper {
+  padding-top: 4%;
+  margin-bottom: 4%;
+  font-size:24px;
+}
+
+#option-wrapper {
+  font-size: 18px;
+}
+
+.option {
+  margin-top: 10px;
+  margin-bottom: 10px;
+  padding: 5px 10px;
+  
+  border: 1px solid #CCC;
+  background-color: #FFF;
+}
+
+.option input {
+  display: inline;
+}
+
+.count {
+  float: right;
+}
+
+#fb-comment-container {
+  margin-top: 2%;
+}
+
+#buttons {
+  height: 70px;
+}
+
+#buttons button {
+  float: right;
+  padding: 0px;
+  border: 0px;
+  margin-left: 10px;
+}
+
+.fb-comments {
+  margin-left: auto;
+  margin-right: auto;
+}

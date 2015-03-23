@@ -1,0 +1,49 @@
+#title {
+  padding-top: 50px;
+  padding-bottom: 20px;
+  font-size: 32px;
+}
+
+#question-container {
+  padding-top: 5%;
+}
+
+#title, #question, .option-wrapper, #create-question, #add-option {
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+#question, .option-wrapper, #add-option {
+  width: 50%;
+  font-size: 16px;
+}
+
+.option, .remove-button {
+  display: inline-block;
+}
+
+.option {
+  width: 95%;
+}
+
+.remove-button {
+  padding: 5px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+#create-question {
+  width: 110px;
+  display: block;
+  font-size: 18px;
+}
+
+#add-option {
+  padding: 6px;
+  margin-bottom: 20px;
+  border: 1px dashed #c0c0c0;
+  
+  color: #c0c0c0;
+  cursor: pointer;
+}

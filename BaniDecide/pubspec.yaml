@@ -1,0 +1,18 @@
+name: 'BaniDecide'
+version: 0.0.1
+description: >
+  A minimal web app for the developer that doesn’t want to be confused by too
+  much going on.
+#author: <your name> <email@example.com>
+#homepage: https://www.example.com
+environment:
+  sdk: '>=1.0.0 <2.0.0'
+dependencies:
+  browser: any
+  html5lib: any
+transformers:
+- script_inliner
+transformers:
+- $dart2js:
+    checked: true
+    minify: true

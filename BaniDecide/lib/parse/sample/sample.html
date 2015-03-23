@@ -1,0 +1,89 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Sample</title>
+
+  <!-- SDK dependency -->
+  <script src="http://www.parsecdn.com/js/parse-1.3.4.min.js"></script>
+</head>
+
+<body>
+  <!-- Parse Initialization: must be the FIRST script-->
+  <script>
+    var appId = "EeGKlcEmDhT5SMjQhs6iRaYdIIohsM6rGWNn9iP2";
+    var jsKey = "CEnbro29EZJaKvRqIdpH46yaJcfk8UTdEspS5Qrm";
+    Parse.initialize(appId, jsKey);
+  </script>
+
+  請開啟console並配合code~
+  <div>
+    <button onclick="test()">TestSDK</button>
+  </div>
+  <div>
+    <button onclick="testGetQuestion()">TestGetQuestion</button>
+  </div>
+  <div>
+    <button onclick="testAddQuestion()">TestAddQuestion</button>
+  </div>
+  <div>
+    <button onclick="testSelectItem()">TestSelectItem</button>
+  </div>
+  <script>
+
+    function test() {
+      var TestObject = Parse.Object.extend("TestObject");
+      var testObject = new TestObject();
+      testObject.save({foo: "bar"}).then(function(object) {
+        alert("yay! it worked");
+      },function(error) {
+        alert("OH failed");
+      });
+    }
+
+    function testGetQuestion() {
+      var theQid = "xYhXz6tKlb"; // 暫時放的假問題的ID~
+      Parse.Cloud.run("getQuestion", {qid: theQid}).then(function(respStr) {
+        console.log(respStr);
+        var resp = JSON.parse(respStr);
+        var question = resp.q;
+        var options = resp.a;
+        var counts = resp.counts;
+
+        console.log("question:" + question + ", options:" + options + ", counts:" + counts);
+      }, function(error) {
+        console.log(JSON.stringify(error));
+      });
+    }
+
+    function testAddQuestion() {
+      var theQ = "新年快樂";
+      var theA = ["快樂", "不快樂", "很爽", "沒差吧"];
+      Parse.Cloud.run("addQuestion", {q: theQ, a: theA}).then(function(respStr) {
+        var resp = JSON.parse(respStr);
+        var qid = resp.qid;
+        console.log("new qid=" + qid);
+      }, function(error) {
+        console.log(JSON.stringify(error));
+      });
+    }
+
+    function testSelectItem() {
+      var theUid = "abc"; //whatever
+      var theQid = "xYhXz6tKlb"; // 和testGetQUestion同一題
+      var theNumber = 0;  // 0~3
+      Parse.Cloud.run("selectItem", 
+        {uid: theUid, qid: theQid, number: theNumber}
+      ).then(function(respStr) {
+        console.log(respStr);
+      }, function(error) {
+        console.log(JSON.stringify(error));
+      });
+    }
+  </script>
+
+
+
+</body>
+</html> 

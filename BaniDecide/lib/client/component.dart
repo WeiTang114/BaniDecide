@@ -20,20 +20,16 @@ Future checkLoggedIn() {
 
 class QuestionInput {
   TextInputElement question;
-  //List<TextInputElement> options = new List(DEFAULT_OPTION_NUM);
   
   FormElement _parent;
   DivElement _child;
-  FormElement _sender;
   DivElement _removeBtn;
   String _qid;
   
   QuestionInput() {
     question = querySelector('#question');
-    //options = querySelectorAll('.option');
     _parent = querySelector('#question-container form');
     _child = querySelector('.option-wrapper').clone(true);
-    _sender = querySelector('#send-form');
     _removeBtn = querySelector('.remove-button');
 
     _startRemoveListener(querySelector('.option-wrapper'));
@@ -109,9 +105,7 @@ class QuestionInput {
   }
   
   void _jumpPage() {
-    AnchorElement jump = querySelector('#jump-page');
-    jump.href = 'question.html?' + _qid;
-    jump.click();
+    window.location.href = 'question.html?' + _qid;
   }
   
   String get _q => question.value;

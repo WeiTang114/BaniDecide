@@ -41,48 +41,21 @@ Parse.Cloud.define("hello", function(request, response) {
 Parse.Cloud.define("uploadParseUser", function(request, response) {
   var user = request.params.user;
   var fbUid = user.authData.facebook.id;
-  var sToken = user.authData.facebook.access_token;
-
-  console.log(sToken);
-
-  
-
-
-  // exchange a short token for a long token
-  var url = FB_APIURL + "oauth/access_token?" 
-            + "grant_type=fb_exchange_token"
-            + "&client_id=" + FB_APPID
-            + "&client_secret=" + FB_APPSECRET
-            + "&fb_exchange_token=" + sToken; 
-  console.log(url);
-
   var msg;
-  var lToken;  
-  Parse.Cloud.httpRequest({url: url}).then(function(resp) {
-    lToken = resp.text;
-    if (isNullOrUndef(lToken)) {
-      return Parse.Promise.error("long token not got");
-    }
-
-    var query = new Parse.Query(Parse.User);
-    return query.get(user.objectId);
-  }).then(function(parseUser) {
+  var query = new Parse.Query(Parse.User);
+  query.get(user.objectId).then(function(parseUser) {
     var answeredCnt = parseUser.get(KEY_ANSWERED_CNT);
-
-    // change the access token to be the long one
-    var authData = parseUser.get(KEY_AUTHDATA);
-    authData.facebook.access_token = lToken;     
 
     // save fbUid in a seperate column, save authdata 
     parseUser.set(KEY_FB_UID, fbUid);
-    parseUser.set(KEY_AUTHDATA,authData);
     parseUser.set(KEY_ANSWERED_CNT,isNullOrUndef(answeredCnt) ? 0 : answeredCnt);
     parseUser.set(KEY_ANSWERED_QIDS,[]);
     return parseUser.save();
   }).then(function(resp) {
     response.success(resp);
   }, function(error) {
-    response.error(error);
+    console.error("uploadParseUser fail." + JSON.stringify(error));
+    response.error(JSON.stringify(error));
   }); 
 });
 

@@ -1,46 +1,58 @@
 <!DOCTYPE HTML>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<link rel=stylesheet type="test/css" href="../css/authen.css">
-		<script type="text/javascript" src="http://connect.facebook.net/zh_TW/all.js"></script>
-		<script type="text/javascript" src="../js/fb_utils.js"></script> 
-		<script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.3.4.min.js"></script>
-  		<script type="text/javascript" src="../js/parse/parse_client.js"></script>
-	</head>
-	<body>
-		<div id="vertical">
-			<div id="horizontal">
-				<img id="fblogin" src="http://csie.ntu.edu.tw/~b01902030/fb_test/fbsignin.png" onclick="redirect()">
-				<script type="text/javascript" >
-					function redirect(){
-						fb_login();
-						getLoginStatus(
-							function(resp){if(resp == 1) window.location.assign("add_question.html");},
-						    function(resp){console.log(resp)});
-					}
-				</script>
-			</div>
-		</div>
-		<script>
-	     	window.fbAsyncInit = function() {
-		        initParse();
-		        Parse.FacebookUtils.init({ // this line replaces FB.init({
-		          appId      : '303348743168816', // Facebook App ID
-		          status     : true,  // check Facebook Login status
-		          cookie     : true,  // enable cookies to allow Parse to access the session
-		          xfbml      : true,  // initialize Facebook social plugins on the page
-		          version    : 'v2.2' // point to the latest Facebook Graph API version
-		        });
-		    };
-	      	(function(d, s, id) {
-	        	var js, fjs = d.getElementsByTagName(s)[0];
-		        if (d.getElementById(id)) return;
-		        js = d.createElement(s); js.id = id;
-		        js.src = "http://connect.facebook.net/zh_TW/sdk.js";
-		        fjs.parentNode.insertBefore(js, fjs);
-		    }(document, 'script', 'facebook-jssdk'));
-	    </script>
-		<footer><div>copyright &copy 2015HackNTU</div></footer>
-	</body>
+  <head>
+    <meta charset="utf-8">
+    <link rel=stylesheet type="test/css" href="../css/authen.css">
+    <script type="text/javascript" src="http://connect.facebook.net/zh_TW/all.js"></script>
+    <script type="text/javascript" src="../js/fb_utils.js"></script> 
+    <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.3.4.min.js"></script>
+      <script type="text/javascript" src="../js/parse/parse_client.js"></script>
+  </head>
+  <body>
+  
+      <script>
+        window.fbAsyncInit = function() {
+          
+          console.log("hey initializaing fbutils");
+            initParse();
+            Parse.FacebookUtils.init({ // this line replaces FB.init({
+              appId      : '303348743168816', // Facebook App ID
+              status     : true,  // check Facebook Login status
+              cookie     : true,  // enable cookies to allow Parse to access the session
+              xfbml      : true,  // initialize Facebook social plugins on the page
+              version    : 'v1.0' // point to the latest Facebook Graph API version
+            });
+        };
+          (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = "http://connect.facebook.net/zh_TW/all.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+      </script>
+    <div id="vertical">
+      <div id="horizontal">
+        <img id="fblogin" src="http://csie.ntu.edu.tw/~b01902030/fb_test/fbsignin.png" onclick="redirect()">
+        <script type="text/javascript" >
+          function redirect(){
+            getLoginState( function(resp){
+              if(resp == 1) {
+                window.location.assign("add_question.html");
+              }
+              else {
+                fb_login_callback(redirect, function(errmsg) {
+                  console.log(errmsg);
+                });
+              }
+            }, function(resp){
+                console.log(resp)
+            });
+          }
+        </script>
+      </div>
+    </div>
+    
+    <footer><div>copyright &copy 2015HackNTU</div></footer>
+  </body>
 </html>

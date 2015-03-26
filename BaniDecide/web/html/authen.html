@@ -3,12 +3,21 @@
 	<head>
 		<meta charset="utf-8">
 		<link rel=stylesheet type="test/css" href="../css/authen.css">
+		<script type="text/javascript" src="http://connect.facebook.net/zh_TW/all.js"></script>
+		<script src="../js/fb_utils.js"></script> 
 	<!--><script type="text/javascript" src="fb_test.js"></script><!--> 
 	</head>
 	<body>
 		<div id="vertical">
 			<div id="horizontal">
-				<img id="fblogin" src="http://csie.ntu.edu.tw/~b01902030/fb_test/fbsignin.png">
+				<img id="fblogin" src="http://csie.ntu.edu.tw/~b01902030/fb_test/fbsignin.png" onclick="redirect()">
+				<script type="text/javascript" >
+					function redirect(){
+						fb_login();
+						if(getLoginStatus() == 1)
+							window.location.assign("../add_question.html");
+					}
+				</script>
 			</div>
 		</div>
 		<footer><div>copyright &copy 2015HackNTU</div></footer>

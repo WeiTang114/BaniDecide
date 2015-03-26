@@ -13,7 +13,9 @@ Future checkLoggedIn() {
   final Completer cmpl = new Completer();
   var ok = (response) => cmpl.complete(response.toString() == '1');
   var fail = (error) => cmpl.completeError(error);
+  
   js.context.callMethod('getLoginState', [ok, fail]);
+  
   return cmpl.future;
 }
 
@@ -24,15 +26,20 @@ class QuestionInput {
   FormElement _parent;
   DivElement _child;
   DivElement _removeBtn;
-  String _qid;
   
   QuestionInput() {
-    question = querySelector('#question');
-    _parent = querySelector('#question-container form');
-    _child = querySelector('.option-wrapper').clone(true);
-    _removeBtn = querySelector('.remove-button');
+    _uploadUser().then((_) {
+      question = querySelector('#question');
+      _parent = querySelector('#question-container form');
+      _child = querySelector('.option-wrapper').clone(true);
+      _removeBtn = querySelector('.remove-button');
 
-    _startRemoveListener(querySelector('.option-wrapper'));
+      _startRemoveListener(querySelector('.option-wrapper'));
+    })
+    .catchError((ex) {
+      print('Upload user failed: $ex');
+      window.location.href = 'authen.html';
+    });
   }
   
   void startAddOptionListener() {
@@ -55,22 +62,26 @@ class QuestionInput {
         print('inpud is invalid.');
         return;
       }
+      _addQuestion().then((response) {
+        _jumpPage(response[QUESTION_ID]);
+      }).catchError((ex)
+        => print('fail to add question: $ex'));
       
-      checkLoggedIn()
-          .then((loggedIn) {
-            print('loggedIn $loggedIn');
-            if (loggedIn)
-              _addQuestion();
-            else {                
-              print('Please login first!');
-              js.context.callMethod('fb_login');
-            }
-          }).then((response) {
-            _qid = response[QUESTION_ID];
-            print("qid: $_qid");
-            _jumpPage();
-          }).catchError((ex)
-            => print('fail to add question: $ex'));
+//      checkLoggedIn()
+//          .then((loggedIn) {
+//            print('loggedIn $loggedIn');
+//            if (loggedIn)
+//              _addQuestion();
+//            else {                
+//              print('Please login first!');
+//              js.context.callMethod('fb_login');
+//            }
+//          }).then((response) {
+//            _qid = response[QUESTION_ID];
+//            print("qid: $_qid");
+//            _jumpPage();
+//          }).catchError((ex)
+//            => print('fail to add question: $ex'));
     });    
   }
   
@@ -94,6 +105,17 @@ class QuestionInput {
     });
   }
   
+  Future _uploadUser() {
+    final Completer cmpl = new Completer();
+    
+    var ok = (response) => cmpl.complete(response);
+    var fail = (error) => cmpl.completeError(error);
+    
+    js.context.callMethod('uploadParseUser', [ok, fail]);
+    
+    return cmpl.future;
+  }
+  
   Future _addQuestion() {
     final Completer cmpl = new Completer();
     
@@ -104,8 +126,8 @@ class QuestionInput {
     return cmpl.future;
   }
   
-  void _jumpPage() {
-    window.location.href = 'question.html?' + _qid;
+  void _jumpPage(String qid) {
+    window.location.href = 'question.html?id=' + qid;
   }
   
   String get _q => question.value;
@@ -131,15 +153,15 @@ class QuestionInput {
     => _options.length;
 
 
-  Future _checkLoggedIn() {
-    print('checkLoggedIn called');
-
-    final Completer cmpl = new Completer();
-    var ok = (response) => cmpl.complete(response.toString() == '1');
-    var fail = (error) => cmpl.completeError(error);
-    js.context.callMethod('getLoginState', [ok, fail]);
-    return cmpl.future;
-  }
+//  Future _checkLoggedIn() {
+//    print('checkLoggedIn called');
+//
+//    final Completer cmpl = new Completer();
+//    var ok = (response) => cmpl.complete(response.toString() == '1');
+//    var fail = (error) => cmpl.completeError(error);
+//    js.context.callMethod('getLoginState', [ok, fail]);
+//    return cmpl.future;
+//  }
 }
 
 

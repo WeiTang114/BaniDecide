@@ -45,11 +45,12 @@ Parse.Cloud.define("uploadParseUser", function(request, response) {
   var query = new Parse.Query(Parse.User);
   query.get(user.objectId).then(function(parseUser) {
     var answeredCnt = parseUser.get(KEY_ANSWERED_CNT);
+    var answeredQids = parseUser.get(KEY_ANSWERED_QIDS);
 
     // save fbUid in a seperate column, save authdata 
     parseUser.set(KEY_FB_UID, fbUid);
     parseUser.set(KEY_ANSWERED_CNT,isNullOrUndef(answeredCnt) ? 0 : answeredCnt);
-    parseUser.set(KEY_ANSWERED_QIDS,[]);
+    parseUser.set(KEY_ANSWERED_QIDS,isNullOrUndef(answeredQids) ? [] : answeredQids);
     return parseUser.save();
   }).then(function(resp) {
     response.success(resp);

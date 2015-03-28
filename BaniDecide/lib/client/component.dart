@@ -6,20 +6,6 @@ import "dart:js" as js;
 
 import '../generic/field_name.dart';
 
-
-Future checkLoggedIn() {
-  print('checkLoggedIn called');
-
-  final Completer cmpl = new Completer();
-  var ok = (response) => cmpl.complete(response.toString() == '1');
-  var fail = (error) => cmpl.completeError(error);
-  
-  js.context.callMethod('getLoginState', [ok, fail]);
-  
-  return cmpl.future;
-}
-
-
 class QuestionInput {
   TextInputElement question;
   
@@ -31,7 +17,7 @@ class QuestionInput {
     _uploadUser().then((_) {
       question = querySelector('#question');
       _parent = querySelector('#question-container form');
-      _child = querySelector('.option-wrapper').clone(true);
+      _child = querySelector('.option-wrapper');
       _removeBtn = querySelector('.remove-button');
 
       _startRemoveListener(querySelector('.option-wrapper'));
@@ -54,7 +40,6 @@ class QuestionInput {
      _startRemoveListener(child);
     });
   }
-  
 
   void startSubmitListener() {
     querySelector('#create-question').onClick.listen((_) {
@@ -66,22 +51,6 @@ class QuestionInput {
         _jumpPage(response[QUESTION_ID]);
       }).catchError((ex)
         => print('fail to add question: $ex'));
-      
-//      checkLoggedIn()
-//          .then((loggedIn) {
-//            print('loggedIn $loggedIn');
-//            if (loggedIn)
-//              _addQuestion();
-//            else {                
-//              print('Please login first!');
-//              js.context.callMethod('fb_login');
-//            }
-//          }).then((response) {
-//            _qid = response[QUESTION_ID];
-//            print("qid: $_qid");
-//            _jumpPage();
-//          }).catchError((ex)
-//            => print('fail to add question: $ex'));
     });    
   }
   
@@ -152,31 +121,25 @@ class QuestionInput {
   int get _ansCount 
     => _options.length;
 
-
-//  Future _checkLoggedIn() {
-//    print('checkLoggedIn called');
-//
-//    final Completer cmpl = new Completer();
-//    var ok = (response) => cmpl.complete(response.toString() == '1');
-//    var fail = (error) => cmpl.completeError(error);
-//    js.context.callMethod('getLoginState', [ok, fail]);
-//    return cmpl.future;
-//  }
 }
 
 
 class QuestionOutput {
   SpanElement question;
-  List<RadioButtonInputElement> optionsRadio;
-  List<SpanElement> options;
-  List<DivElement> optionsCount;
+  List<DivElement> options;
+  FormElement parent;
   
   String qid;
-  String uid;
   int ansCount;
+  
+  DivElement _optionTemplate;
+  int _selectedOption;
 
   QuestionOutput(this.qid) {
     question = querySelector('#question-wrapper .content');
+    options = new List();
+    parent = querySelector('#options');
+    _optionTemplate = querySelector('.option');
   }
   
   void generate() {
@@ -184,29 +147,30 @@ class QuestionOutput {
       question.text = response[QUESTION_CONTENT];
       ansCount = response[AN];
 
-      optionsRadio = querySelectorAll('#option-wrapper #options input');
-      options = querySelectorAll('#option-wrapper #options .content');
-      optionsCount = querySelectorAll('#option-wrapper #options .count');
       for (int i = 0; i < ansCount; i++) {
-        options[i].text = response[QUESTION_OPTIONS][i].toString();
-        optionsCount[i].text = response[OPTIONS_COUNTS][i].toString() + ' 票';
-      }  
+        print('in add option');
+        
+        DivElement temp = _optionTemplate.clone(true);
+        temp.classes.remove('hidden');
+        (temp.querySelector('input') as InputElement).value = '$i';
+        temp.querySelector('.content').text = response[QUESTION_OPTIONS][i];
+        temp.querySelector('.count').text = response[OPTIONS_COUNTS][i].toString() + ' 票';
+        options.add(temp);
+        
+        parent.children.insert(i, temp);        
+      }
       startSelectListener();
     }).catchError((ex)
         => print('fail to generate question: $ex'));
   }
   
   void startSelectListener() {
-    optionsRadio.forEach((RadioButtonInputElement optionRadio) {
-      optionRadio.onClick.listen((_) => _select());
-    });
-  }
-  void _select() {
-    _selectItem().then((response) {
-      for (int i = 0; i < ansCount; i++) 
-        optionsCount[i].text = response[OPTIONS_COUNTS][i].toString() + ' 票';
-    }).catchError((ex)
-        => print('fail to select option: $ex'));
+    for (int i = 0; i < options.length; i++) {
+//      option.onClick.listen((_) {
+//      _selectedOption = i;
+//      _select();
+//      });
+    }
   }
   
   Future _getQuestion() {
@@ -219,23 +183,31 @@ class QuestionOutput {
     return cmpl.future;
   }
   
-  Future _selectItem() {
-    final Completer cmpl = new Completer();
-
-    checkLoggedIn()
-        .then((loggedIn) {
-          if (!loggedIn) {
-            print("Please login first!");
-            js.context.callMethod('fb_login');      
-          }
-          else {
-            uid = js.context['uid'].toString();
-            print('uid: $uid');
-            var ok = (response) => cmpl.complete(response);
-            var fail = (error) => cmpl.completeError(error);
-            js.context.callMethod('selectItem', [qid, _selectedOption, ok, fail]);
-          }
-        });
+//  void _select() {
+//    _selectItem().then((response) {
+//      for (int i = 0; i < ansCount; i++) 
+//        optionsCount[i].text = response[OPTIONS_COUNTS][i].toString() + ' 票';
+//    }).catchError((ex)
+//        => print('fail to select option: $ex'));
+//  }
+//  
+//  Future _selectItem() {
+//    final Completer cmpl = new Completer();
+//
+//    checkLoggedIn()
+//        .then((loggedIn) {
+//          if (!loggedIn) {
+//            print("Please login first!");
+//            js.context.callMethod('fb_login');      
+//          }
+//          else {
+//            uid = js.context['uid'].toString();
+//            print('uid: $uid');
+//            var ok = (response) => cmpl.complete(response);
+//            var fail = (error) => cmpl.completeError(error);
+//            js.context.callMethod('selectItem', [qid, _selectedOption, ok, fail]);
+//          }
+//        });
 
 
     // if (!_isLoggedin) {
@@ -248,19 +220,8 @@ class QuestionOutput {
     //   var fail = (error) => cmpl.completeError(error);
     //   js.context.callMethod('selectItem', [uid, qid, _selectedOption, ok, fail]);
     // }
-    return cmpl.future;
-  }
-  
-  int get _selectedOption {
-    for (int i = 0; i < ansCount; i++) {
-      if (optionsRadio[i].checked)
-        return i;
-    }
-    return NONE_SELECTED;
-  }
-  
-  bool get _isLoggedin
-    => js.context.callMethod('getLoginState').toString() == '1';
+//    return cmpl.future;
+//  }
 }
 
 

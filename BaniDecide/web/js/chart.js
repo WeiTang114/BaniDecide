@@ -1,7 +1,11 @@
-function createChart(answers,counts,number,title,onSuccess,onFail){
+var data;
+var options;
+var chart;
 
-    console.log('success!');
-    try{
+function createChart(answers,counts,number,title)//onSuccess,onFail)
+{
+
+    //console.log('success!');
         google.load('visualization', '1.0', {'packages':['corechart']});
 
         // Set a callback to run when the Google Visualization API is loaded.
@@ -13,24 +17,21 @@ function createChart(answers,counts,number,title,onSuccess,onFail){
         function drawChart() {
 
           // Create the data table.
-          var data = new google.visualization.DataTable();
+          data = new google.visualization.DataTable();
           data.addColumn('string');
           data.addColumn('number');
           for(var i=0;i<number;i++)
             data.addRows([[answers[i], counts[i]]]);
           
           // Set chart options
-          var options = {'title':title,
-                         'width':400,
-                         'height':300};
+          options = {'title':title,
+                       'width':400,
+                       'height':300};
 
           // Instantiate and draw our chart, passing in some options.
-          var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+          chart = new google.visualization.PieChart(document.getElementById('chart_div'));
           chart.draw(data, options);
+          console.log(data);
         }
-        onSuccess();
-    }
-    catch(e){
-      onFail(e);  
-    }
+    
 }

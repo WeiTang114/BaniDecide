@@ -2,7 +2,7 @@ var data;
 var options;
 var chart;
 
-function createChart(answers,counts,number,title,onSuccess,onFail)
+function createChart(title,number,answers,counts,onSuccess,onFail)
 {
 
     //console.log('success!');

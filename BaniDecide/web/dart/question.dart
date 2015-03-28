@@ -8,7 +8,8 @@ import 'package:BaniDecide/client/component.dart';
 void main() {
   String qid = getQuestionId(window.location);
   QuestionOutput output = new QuestionOutput(qid);
-  output.generate();
+  output..generate()
+        ..startSubmitListener();
   
   querySelector('.fb-comments').dataset['href'] = window.location.toString();
 }

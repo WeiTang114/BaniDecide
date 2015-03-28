@@ -4,6 +4,7 @@ import "dart:html";
 import "dart:async";
 import "dart:js" as js;
 
+import 'util.dart';
 import '../generic/field_name.dart';
 
 class QuestionInput {
@@ -14,7 +15,7 @@ class QuestionInput {
   DivElement _removeBtn;
   
   QuestionInput() {
-    _uploadUser().then((_) {
+    uploadUser().then((_) {
       question = querySelector('#question');
       _parent = querySelector('#question-container form');
       _child = querySelector('.option-wrapper');
@@ -72,17 +73,6 @@ class QuestionInput {
       _displayRemoveBtn();
       listener.cancel();
     });
-  }
-  
-  Future _uploadUser() {
-    final Completer cmpl = new Completer();
-    
-    var ok = (response) => cmpl.complete(response);
-    var fail = (error) => cmpl.completeError(error);
-    
-    js.context.callMethod('uploadParseUser', [ok, fail]);
-    
-    return cmpl.future;
   }
   
   Future _addQuestion() {
@@ -147,9 +137,7 @@ class QuestionOutput {
       question.text = response[QUESTION_CONTENT];
       ansCount = response[AN];
 
-      for (int i = 0; i < ansCount; i++) {
-        print('in add option');
-        
+      for (int i = 0; i < ansCount; i++) {        
         DivElement temp = _optionTemplate.clone(true);
         temp.classes.remove('hidden');
         (temp.querySelector('input') as InputElement).value = '$i';
@@ -166,10 +154,10 @@ class QuestionOutput {
   
   void startSelectListener() {
     for (int i = 0; i < options.length; i++) {
-//      option.onClick.listen((_) {
-//      _selectedOption = i;
-//      _select();
-//      });
+      options[i].onClick.listen((_) {
+      _selectedOption = i;
+      _select();
+      });
     }
   }
   
@@ -183,45 +171,29 @@ class QuestionOutput {
     return cmpl.future;
   }
   
-//  void _select() {
-//    _selectItem().then((response) {
-//      for (int i = 0; i < ansCount; i++) 
-//        optionsCount[i].text = response[OPTIONS_COUNTS][i].toString() + ' 票';
-//    }).catchError((ex)
-//        => print('fail to select option: $ex'));
-//  }
-//  
-//  Future _selectItem() {
-//    final Completer cmpl = new Completer();
-//
-//    checkLoggedIn()
-//        .then((loggedIn) {
-//          if (!loggedIn) {
-//            print("Please login first!");
-//            js.context.callMethod('fb_login');      
-//          }
-//          else {
-//            uid = js.context['uid'].toString();
-//            print('uid: $uid');
-//            var ok = (response) => cmpl.complete(response);
-//            var fail = (error) => cmpl.completeError(error);
-//            js.context.callMethod('selectItem', [qid, _selectedOption, ok, fail]);
-//          }
-//        });
-
-
-    // if (!_isLoggedin) {
-    //   print("Please login first!");
-    //   js.context.callMethod('fb_login');
-    // } else {
-    //   uid = js.context['uid'].toString();
-    //   print('uid: $uid');
-    //   var ok = (response) => cmpl.complete(response);
-    //   var fail = (error) => cmpl.completeError(error);
-    //   js.context.callMethod('selectItem', [uid, qid, _selectedOption, ok, fail]);
-    // }
-//    return cmpl.future;
-//  }
+  void _select() {
+    _selectItem().then((response) {
+      for (int i = 0; i < ansCount; i++)
+        options[i].querySelector('.count').text = response[OPTIONS_COUNTS][i].toString() + ' 票';
+    }).catchError((ex)
+        => print('fail to select option: $ex'));
+  }
+  
+  Future _selectItem() {
+    final Completer cmpl = new Completer();
+    var ok = (response) => cmpl.complete(response);
+    var fail = (error) => cmpl.completeError(error);
+    
+    uploadUser()
+    .then((response)
+       => js.context.callMethod('selectItem', [qid, _selectedOption, ok, fail]))
+    .catchError((ex) {
+      print('Upload user failed: $ex');
+      //TODO: click login
+      querySelector('#FBLogin').click();
+    });
+    return cmpl.future;
+  }
 }
 
 

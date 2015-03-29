@@ -2,11 +2,11 @@ var data;
 var options;
 var chart;
 
-function createChart(title,number,answers,counts,onSuccess,onFail)
+function createChart(title,number,answers,counts, onSuccess, onFailure)
 {
 
     //console.log('success!');
-      try(){
+      try {
         google.load('visualization', '1.0', {'packages':['corechart']});
 
         // Set a callback to run when the Google Visualization API is loaded.
@@ -30,14 +30,14 @@ function createChart(title,number,answers,counts,onSuccess,onFail)
                        'height':300};
 
           // Instantiate and draw our chart, passing in some options.
-          chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+          chart = new google.visualization.PieChart(document.getElementById('chart'));
           chart.draw(data, options);
-          onSuccess('OK');
+          onSuccess();
         }
       }
       catch(e)
       {
-        onFail(e);
+        onFailure();
       }
     
 }

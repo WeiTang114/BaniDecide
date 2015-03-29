@@ -10,3 +10,5 @@ const String QUESTION_OPTIONS = "a";
 const String OPTIONS_COUNTS = "counts";
 const String FAIL_TYPE = "failtype";
 const String AN = "an";
+const String FRIENDS_ASKED = "friends_asked";
+const String FRIENDS_ANSWERED = "friends_answered";

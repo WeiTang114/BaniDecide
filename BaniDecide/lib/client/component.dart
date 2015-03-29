@@ -119,6 +119,7 @@ class QuestionOutput {
   SpanElement question;
   List<DivElement> options;
   FormElement parent;
+  DivElement submit;
   
   String qid;
   int ansCount;
@@ -130,6 +131,7 @@ class QuestionOutput {
     question = querySelector('#question-wrapper .content');
     options = new List();
     parent = querySelector('#options');
+    submit = querySelector('#submit-option');
     _optionTemplate = querySelector('.option');
   }
   
@@ -148,6 +150,7 @@ class QuestionOutput {
         
         parent.children.insert(i, temp);        
       }
+      submit.classes.remove('hidden');
       startSelectListener();
     }).catchError((ex)
         => print('fail to generate question: $ex'));
@@ -157,9 +160,13 @@ class QuestionOutput {
     for (int i = 0; i < options.length; i++) {
       options[i].onClick.listen((_) {
       _selectedOption = i;
-      _select();
+      (options[i].querySelector('input') as RadioButtonInputElement).checked = true;
       });
     }
+  }
+  
+  void startSubmitListener() {
+    submit.onClick.listen((_) => _select());
   }
   
   Future _getQuestion() {

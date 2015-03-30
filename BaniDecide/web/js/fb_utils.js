@@ -1,5 +1,6 @@
 var uid;
 var accessToken;
+var KEY_TOKEN = "access_token";
 
 function getLoginState(onSuccess, onFail) {
   FB.getLoginStatus(function (response) {
@@ -35,6 +36,7 @@ function fb_login() {
 
       uid = user.get("authData").facebook.id;
       accessToken = user.get("authData").facebook.access_token;
+      saveAccessToken(accessToken);
     },
     error: function(user, error) {
       console.log(error);
@@ -59,6 +61,7 @@ function fb_login_callback(onSuccess, onFail) {
 
       uid = user.get("authData").facebook.id;
       accessToken = user.get("authData").facebook.access_token;
+      saveAccessToken(accessToken);
       onSuccess({user:user});
     },
     error: function(user, error) {
@@ -86,4 +89,15 @@ function fb_share() {
       }
     }
   );
+}
+
+function saveAccessToken(token) {
+  localStorage.setItem(KEY_TOKEN, token);
+  console.log("accesstoken stored to storage with key=" + KEY_TOKEN);
+}
+
+function getAccessToken() {
+  var token = localStorage.getItem(KEY_TOKEN);
+  console.log("get accesstoken from localstorage");
+  return token;
 }

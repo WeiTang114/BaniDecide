@@ -262,16 +262,22 @@ Parse.Cloud.define("getOtherQuestions", function(request, response) {
     return Parse.Cloud.httpRequest({url:url});
   }).then(function(resp) {
     console.log("facebook response:" + JSON.stringify(resp));
-    var friends = resp;
+    var friends = resp.data.data;
     var fIds = [];
-    for (f in friends) {
+    for (var i = 0; i < friends.length; i++) {
+      var f = friends[i];
       fIds.push(f.id);
+    }
+
+    if (fIds.length == 0) {
+      response.error("no friends found");
+      return;
     }
 
     // two types!
     if (type == TYPE_FRIEND_ASKED) {
       query = new Parse.Query(Question);
-      query.containedIn(KEY_UID, fIds);
+      query.containedIn(KEY_FB_UID, fIds);
       return query.find();
     }
     else if (type == TYPE_FRIEND_ANSWERED) {
@@ -281,7 +287,6 @@ Parse.Cloud.define("getOtherQuestions", function(request, response) {
       return query.find();
     }
   }).then(function(resp) {
-    console.log("aaabb " + resp);
     if (type == TYPE_FRIEND_ASKED) {
       questions = resp;
       return Parse.Promise.as();
@@ -289,8 +294,15 @@ Parse.Cloud.define("getOtherQuestions", function(request, response) {
     else if (type == TYPE_FRIEND_ANSWERED) {  
       var answeredFriends = resp;
       var qids = [];
-      for (f in answeredFriends) {
-        for (qid in answeredFriends[KEY_ANSWERED_QIDS]) {
+      for (var i = 0; i < answeredFriends.length; i++) {
+        var f = answeredFriends[i];
+        var ansQids = f.get(KEY_ANSWERED_QIDS); 
+        if (isNullOrUndef(ansQids)) {
+          continue;
+        }
+
+        for (var j = 0; j < ansQids.length; j++) {
+          var qid = ansQids[j];
           qids.push(qid);
         }
       }
@@ -310,6 +322,10 @@ Parse.Cloud.define("getOtherQuestions", function(request, response) {
     var qRet = [];
     var cntRet = 0;
     for (var i = 0; i < count; i++, cntRet++) {
+      if (isNullOrUndef(questions) || i >= questions.length) {
+        // no question!
+        break;
+      }
       var q = questions[i].toJSON();
       qRet.push({
         fbUid:  q[KEY_FB_UID],

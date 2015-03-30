@@ -3,6 +3,7 @@ library client.component;
 import "dart:html";
 import "dart:async";
 import "dart:js" as js;
+import "dart:convert";
 
 import 'util.dart';
 import '../generic/field_name.dart';
@@ -235,3 +236,106 @@ class QuestionOutput {
     return cmpl.future;
   }
 }
+
+
+class OtherQuestions {
+  
+  DivElement _qBlock;
+  DivElement _askedContainer;
+  DivElement _answeredContainer;
+  // ImageElement _thumb;
+  // SpanElement _name;
+  // SpanElemnt _question;
+
+  OtherQuestions() {
+    _askedContainer = querySelector('.asked');
+    _answeredContainer = querySelector('.answered');
+    _qBlock = querySelector('.q_block');
+    //_qBlock.style.display = 'none';
+    // _thumb = querySelector('.q_block img');
+    // _name = querySelector('.q_block .name');
+    // _question = querySelector('.q_block .question');
+    
+  }
+
+  void generate() {
+    handlerError(var ex) {
+      print('Upload user failed: $ex');
+    }
+
+    _getOtherQuestions('friends_asked').then((response) {
+      print('friends_asked:' + response.toString());
+      var questions = response['questions'];
+      for (var q in questions) {
+        DivElement block = _newQuestionBlock(q, '問');      
+        _askedContainer.children.insert(_askedContainer.children.length, block);  
+      }
+    }).catchError(handlerError);
+
+    // give up friends_answered  
+    /*
+    _getOtherQuestions('friends_answered').then((response) {
+      print('friends_answered:' + response.toString());
+      var questions = response['questions'];
+      for (var q in questions) {
+        DivElement block = _newQuestionBlock(q);      
+        _answeredContainer.children.insert(_answeredContainer.children.length, block);  
+      }
+    }).catchError(handlerError);
+    */
+  }
+
+  Future _getOtherQuestions(String type) {
+    final Completer cmpl = new Completer();
+    var ok = (response) => cmpl.complete(response);
+    var fail = (error) => cmpl.completeError(error[FAIL_TYPE]);
+    js.context.callMethod('getOtherQuestions', [type, 3, ok, fail]);
+    return cmpl.future;
+  }
+
+  DivElement _newQuestionBlock(js.JsObject question, String actionStr) {
+    DivElement block = _qBlock.clone(true);
+    //block.style.display = 'r';
+    SpanElement q = block.querySelector('.question');
+    SpanElement name = block.querySelector('.name');
+    SpanElement action = block.querySelector('.action');
+    ImageElement thumb = block.querySelector('.thumb');
+    String fbUid = question['fbUid'];
+    action.text = actionStr + '：';
+    q.text = question['q'];
+
+    var fbUrl = "https://graph.facebook.com/";
+    var uid = question['fbUid'];
+    var urlProfile = fbUrl + uid + '?access_token=' + getAccessToken();
+    var urlPicture = fbUrl + uid + "/picture?type=large&access_token=" + getAccessToken();
+
+    print('urlProfile:' + urlProfile);
+    print('urlPicture:' + urlPicture);
+
+    var request = HttpRequest.getString(urlProfile).then((respText) {
+      Map resp = JSON.decode(respText);
+      var jsonString = respText;
+      print(jsonString);
+      name.text = resp['name'];
+    });
+
+    // var requestPic = HttpRequest.getString(urlPicture).then((respText) {
+    //   Map resp = JSON.decode(respText);
+    //   var jsonString = respText;
+    //   //print(jsonString);
+    //   var picUrl = resp['data']['url'];
+    //   print("picUrl:" + picUrl);
+    //   thumb.src = picUrl;
+    // });
+
+    thumb.src = urlPicture;
+
+    return block;
+  }
+
+  String getAccessToken() {
+    return js.context.callMethod('getAccessToken');
+  }
+
+}
+

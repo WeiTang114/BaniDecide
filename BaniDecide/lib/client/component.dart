@@ -122,6 +122,7 @@ class QuestionOutput {
   
   String qid;
   int ansCount;
+  Map data;
   
   DivElement _optionTemplate;
   int _selectedOption;
@@ -132,21 +133,30 @@ class QuestionOutput {
     parent = querySelector('#options');
     submit = querySelector('#submit-option');
     _optionTemplate = querySelector('.option');
+    
+    data = new Map();
   }
   
   void generate() {
     _getQuestion().then((response) {
-      question.text = response[QUESTION_CONTENT];
-      ansCount = response[AN];
-
+      
+      data.addAll({QUESTION_CONTENT: response[QUESTION_CONTENT],
+                   AN: response[AN],
+                   QUESTION_OPTIONS: response[QUESTION_OPTIONS],
+                   OPTIONS_COUNTS: response[OPTIONS_COUNTS]
+                  });
+      
+      question.text = data[QUESTION_CONTENT];
+      ansCount = data[AN];
+      
       for (int i = 0; i < ansCount; i++) {        
         DivElement temp = _optionTemplate.clone(true);
         temp.classes.remove('hidden');
         (temp.querySelector('input') as InputElement).value = '$i';
-        temp.querySelector('.content').text = response[QUESTION_OPTIONS][i];
-        temp.querySelector('.count').text = response[OPTIONS_COUNTS][i].toString() + ' 票';
-        options.add(temp);
+        temp.querySelector('.content').text = data[QUESTION_OPTIONS][i];
+        temp.querySelector('.count').text = data[OPTIONS_COUNTS][i].toString() + ' 票';
         
+        options.add(temp);
         parent.children.insert(i, temp);        
       }
       submit.classes.remove('hidden');
@@ -165,7 +175,9 @@ class QuestionOutput {
   }
   
   void startSubmitListener() {
-    submit.onClick.listen((_) => _select());
+    submit.onClick.listen((_) {
+      _select();
+    });
   }
   
   Future _getQuestion() {
@@ -179,11 +191,21 @@ class QuestionOutput {
   }
   
   void _select() {
-    _selectItem().then((response) {
-      for (int i = 0; i < ansCount; i++)
-        options[i].querySelector('.count').text = response[OPTIONS_COUNTS][i].toString() + ' 票';
-    }).catchError((ex)
-        => print('fail to select option: $ex'));
+
+    js.context.callMethod('createChart', [data[QUESTION_CONTENT],
+                                          data[AN],
+                                          data[QUESTION_OPTIONS],
+                                          data[OPTIONS_COUNTS]]);
+    
+//    _selectItem().then((response) {
+//      data[OPTIONS_COUNTS] = response[OPTIONS_COUNTS];
+//      
+//      for (int i = 0; i < ansCount; i++)
+//        options[i].querySelector('.count').text = data[OPTIONS_COUNTS][i].toString() + ' 票';
+//      
+//      return _createChart();
+//    }).catchError((ex)
+//        => print('fail to select option: $ex'));
   }
   
   Future _selectItem() {
@@ -196,18 +218,20 @@ class QuestionOutput {
        => js.context.callMethod('selectItem', [qid, _selectedOption, ok, fail]))
     .catchError((ex) {
       print('Upload user failed: $ex');
-      //TODO: click login
       querySelector('#FBLogin').click();
     });
     return cmpl.future;
   }
-}
-
-
-class FBComment {
-  DivElement a;
   
-  FBComment(String url) {
-    a.dataset['href'] = url;
+  Future _createChart() {
+    final Completer cmpl = new Completer();
+    var ok = (response) => cmpl.complete(response);
+    var fail = (error) => cmpl.completeError(error);
+    js.context.callMethod('createChart', [data[QUESTION_CONTENT],
+                                          data[AN],
+                                          data[QUESTION_OPTIONS],
+                                          data[OPTIONS_COUNTS],
+                                          ok, fail]);
+    return cmpl.future;
   }
 }

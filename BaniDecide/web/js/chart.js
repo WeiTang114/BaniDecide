@@ -32,12 +32,12 @@ function createChart(title,number,answers,counts, onSuccess, onFailure)
           // Instantiate and draw our chart, passing in some options.
           chart = new google.visualization.PieChart(document.getElementById('chart'));
           chart.draw(data, options);
-          onSuccess();
+          onSuccess('OK');
         }
       }
       catch(e)
       {
-        onFailure();
+        onFailure(e);
       }
     
 }

@@ -1,0 +1,50 @@
+.headimg {
+
+}
+
+div > img {
+  /*position:absolute;*/
+  top: 50%;
+  height: 30%;
+  /* display:block;*/
+  left: 50%;
+  /*-webkit-transform: translate(-50%, -50%);*/
+  width: 30%;
+}
+
+body {
+  background-color: #f7f7f7;
+}
+
+#container {
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 30px;
+  width: 50%;
+}
+
+#desc-wrapper {
+  padding: 18px;
+  background-color: #eee;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.sub-title {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.content {
+  font-size: 20px;
+}
+
+#questions-asked {
+  margin-top: 20px;
+}
+
+.question-wrapper {
+}

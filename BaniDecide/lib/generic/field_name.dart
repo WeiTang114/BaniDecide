@@ -12,3 +12,7 @@ const String FAIL_TYPE = "failtype";
 const String AN = "an";
 const String FRIENDS_ASKED = "friends_asked";
 const String FRIENDS_ANSWERED = "friends_answered";
+
+// Facebook OpenGraph type
+const int OG_QUESTION = 1;
+const int OG_CHART = 2;

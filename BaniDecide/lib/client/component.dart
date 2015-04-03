@@ -124,7 +124,8 @@ class QuestionOutput {
   List<DivElement> options;
   FormElement parent;
   DivElement submit;
-  
+  DivElement chartDiv;
+
   String qid;
   int ansCount;
   Map data;
@@ -138,7 +139,7 @@ class QuestionOutput {
     parent = querySelector('#options');
     submit = querySelector('#submit-option');
     _optionTemplate = querySelector('.option');
-    
+    chartDiv = querySelector('#chart');
     data = new Map();
   }
   
@@ -165,7 +166,11 @@ class QuestionOutput {
         parent.children.insert(i, temp);        
       }
       submit.classes.remove('hidden');
+
+      _updateOpenGraph(OG_QUESTION);
+
       startSelectListener();
+      startChartChangeListener();
     }).catchError((ex)
         => print('fail to generate question: $ex'));
   }
@@ -188,6 +193,12 @@ class QuestionOutput {
           return fbLoginCallback().then((_) => uploadUser().then((_) => _select()));
         }
       }).catchError((ex) => print(ex));
+    });
+  }
+
+  void startChartChangeListener() {
+    chartDiv.onChange.listen((event) {
+      _updateOpenGraph(OG_CHART);
     });
   }
   
@@ -240,6 +251,57 @@ class QuestionOutput {
                                           data[OPTIONS_COUNTS],
                                           ok, fail]);
     return cmpl.future;
+  }
+
+  void _updateOpenGraph(int og_type) {
+    var question = data[QUESTION_CONTENT];
+    var options = data[QUESTION_OPTIONS];
+    var logoUrl = 'https://dl-web.dropbox.com/get/logo-01.png?_subject_uid=49648058&w=AADJVAL1QillLm3F1_GYQ9h5mXupoYZvDLTwbJwITH8a9A';
+    MetaElement ogTitle = querySelector('#og_title');
+    MetaElement ogDesc = querySelector('#og_desc');
+    MetaElement ogImg = querySelector('#og_image');
+
+    ogTitle.content = '幫我決定:' + question;
+    for (var i = 0; i < options.length; i++) {
+      ogDesc.content += '(' + (i + 1).toString() + ') ' + options[i] + '  ';
+    }
+
+    if (og_type == OG_QUESTION) {
+      ogImg.content = logoUrl;
+    }
+    else if (og_type == OG_CHART) {
+      ogImg.content = logoUrl; // TODO
+    }
+
+    _forceRescrapeOpenGraph();
+  }
+
+  void _forceRescrapeOpenGraph() {
+
+    HttpRequest request = new HttpRequest(); // create a new XHR
+    
+    // add an event handler that is called when the request finishes
+    request.onReadyStateChange.listen((_) {
+      if (request.readyState == HttpRequest.DONE &&
+          (request.status == 200 || request.status == 0)) {
+        // data saved OK.
+        print(request.responseText); // output the response from the server
+      }
+      else {
+        print(request.responseText);
+        print("這是因為facebook OpenGraph重新擷取分享內容失敗，若是用本機測試可以忽略。")
+      }
+    });
+
+    // POST the data to the server
+    var url = "http://graph.facebook.com";
+    url += "?scrape=true&id=" + Uri.base.toString();
+    request.open("POST", url, async: true);
+
+    //String jsonData = '{"id":"' + Uri.base.toString() + '"';
+    //jsonData += ', "scrape":"true"}'; // etc...
+    //print ('jsonData:' + jsonData);
+    request.send(null); // perform the async POST    
   }
 }
 

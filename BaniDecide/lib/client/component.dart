@@ -49,10 +49,20 @@ class QuestionInput {
         print('inpud is invalid.');
         return;
       }
-      _addQuestion().then((response) {
-        _jumpPage(response[QUESTION_ID]);
+      getLoginState().then((response) {   
+        if (response == '1') {
+          return _addQuestion().then((response) {
+          _jumpPage(response[QUESTION_ID]);
+          });
+        } else {
+          return fbLoginCallback().then((_) {
+            return _addQuestion().then((response) {
+              _jumpPage(response[QUESTION_ID]);
+            });
+          });
+        }
       }).catchError((ex)
-        => print('fail to add question: $ex'));
+          => print('fail to add question: $ex'));
     });    
   }
   

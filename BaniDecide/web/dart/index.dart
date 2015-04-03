@@ -10,7 +10,6 @@ void main() {
   initFB().then((_) => getLoginState())
   .then((response) {    
     if (response == '1') {
-      querySelector('#create').classes.remove('hidden');
       obj = new OtherQuestions();
       obj.generate();
     } else {

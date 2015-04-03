@@ -155,7 +155,7 @@ class QuestionOutput {
         temp.classes.remove('hidden');
         (temp.querySelector('input') as InputElement).value = '$i';
         temp.querySelector('.content').text = data[QUESTION_OPTIONS][i];
-        temp.querySelector('.count').text = data[OPTIONS_COUNTS][i].toString() + ' 票';
+        //temp.querySelector('.count').text = data[OPTIONS_COUNTS][i].toString() + ' 票';
         
         options.add(temp);
         parent.children.insert(i, temp);        
@@ -191,22 +191,16 @@ class QuestionOutput {
     return cmpl.future;
   }
   
-  void _select() {
-
-    js.context.callMethod('createChart', [data[QUESTION_CONTENT],
-                                          data[AN],
-                                          data[QUESTION_OPTIONS],
-                                          data[OPTIONS_COUNTS]]);
-    
-//    _selectItem().then((response) {
-//      data[OPTIONS_COUNTS] = response[OPTIONS_COUNTS];
-//      
-//      for (int i = 0; i < ansCount; i++)
-//        options[i].querySelector('.count').text = data[OPTIONS_COUNTS][i].toString() + ' 票';
-//      
-//      return _createChart();
-//    }).catchError((ex)
-//        => print('fail to select option: $ex'));
+  void _select() {    
+    _selectItem().then((response) {
+      data[OPTIONS_COUNTS] = response[OPTIONS_COUNTS];
+    }).catchError((ex) {
+      print('fail to select option: $ex');
+    }).whenComplete(() {
+      for (int i = 0; i < ansCount; i++)
+        options[i].querySelector('.count').text = data[OPTIONS_COUNTS][i].toString() + ' 票';
+      return _createChart();
+    });
   }
   
   Future _selectItem() {
@@ -240,22 +234,12 @@ class QuestionOutput {
 
 class OtherQuestions {
   
-  DivElement _qBlock;
-  DivElement _askedContainer;
-  DivElement _answeredContainer;
-  // ImageElement _thumb;
-  // SpanElement _name;
-  // SpanElemnt _question;
+  DivElement _askedWrapper;
+  AnchorElement _askedContainer;
 
   OtherQuestions() {
-    _askedContainer = querySelector('.asked');
-    _answeredContainer = querySelector('.answered');
-    _qBlock = querySelector('.q_block');
-    //_qBlock.style.display = 'none';
-    // _thumb = querySelector('.q_block img');
-    // _name = querySelector('.q_block .name');
-    // _question = querySelector('.q_block .question');
-    
+    _askedWrapper = querySelector('#questions-asked');
+    _askedContainer = querySelector('#questions-asked .question-container');
   }
 
   void generate() {
@@ -266,9 +250,10 @@ class OtherQuestions {
     _getOtherQuestions('friends_asked').then((response) {
       print('friends_asked:' + response.toString());
       var questions = response['questions'];
-      for (var q in questions) {
-        DivElement block = _newQuestionBlock(q, '問');      
-        _askedContainer.children.insert(_askedContainer.children.length, block);  
+      for (int i = 0; i < questions.length; i++) {
+        AnchorElement block = _newQuestionBlock(questions[i]);
+        block.href = 'question.html?id=' + questions[i][QUESTION_ID];
+        _askedWrapper.children.insert(i + 1, block);  
       }
     }).catchError(handlerError);
 
@@ -287,50 +272,35 @@ class OtherQuestions {
 
   Future _getOtherQuestions(String type) {
     final Completer cmpl = new Completer();
+    
     var ok = (response) => cmpl.complete(response);
     var fail = (error) => cmpl.completeError(error[FAIL_TYPE]);
     js.context.callMethod('getOtherQuestions', [type, 3, ok, fail]);
+    
     return cmpl.future;
   }
 
-  DivElement _newQuestionBlock(js.JsObject question, String actionStr) {
-    DivElement block = _qBlock.clone(true);
-    //block.style.display = 'r';
-    SpanElement q = block.querySelector('.question');
-    SpanElement name = block.querySelector('.name');
-    SpanElement action = block.querySelector('.action');
-    ImageElement thumb = block.querySelector('.thumb');
-    String fbUid = question['fbUid'];
-    action.text = actionStr + '：';
-    q.text = question['q'];
+  AnchorElement _newQuestionBlock(js.JsObject question) {
+    AnchorElement newQuestion = _askedContainer.clone(true);
+    newQuestion.classes.remove('hidden');
 
     var fbUrl = "https://graph.facebook.com/";
-    var uid = question['fbUid'];
-    var urlProfile = fbUrl + uid + '?access_token=' + getAccessToken();
-    var urlPicture = fbUrl + uid + "/picture?type=large&access_token=" + getAccessToken();
+    String fbUid = question['fbUid'];
+
+    var urlProfile = fbUrl + fbUid + '?access_token=' + getAccessToken();
+    var urlPicture = fbUrl + fbUid + "/picture?type=large&access_token=" + getAccessToken();
 
     print('urlProfile:' + urlProfile);
     print('urlPicture:' + urlPicture);
 
     var request = HttpRequest.getString(urlProfile).then((respText) {
-      Map resp = JSON.decode(respText);
-      var jsonString = respText;
-      print(jsonString);
-      name.text = resp['name'];
+      newQuestion.querySelector('.name').text = JSON.decode(respText)['name'];
     });
+    
+    newQuestion.querySelector('.question').text = question['q'].toString();
+    (newQuestion.querySelector('.thumb')as ImageElement).src = urlPicture;
 
-    // var requestPic = HttpRequest.getString(urlPicture).then((respText) {
-    //   Map resp = JSON.decode(respText);
-    //   var jsonString = respText;
-    //   //print(jsonString);
-    //   var picUrl = resp['data']['url'];
-    //   print("picUrl:" + picUrl);
-    //   thumb.src = picUrl;
-    // });
-
-    thumb.src = urlPicture;
-
-    return block;
+    return newQuestion;
   }
 
   String getAccessToken() {

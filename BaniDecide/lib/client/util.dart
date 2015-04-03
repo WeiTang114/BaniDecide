@@ -16,3 +16,22 @@ Future uploadUser() {
   
   return cmpl.future;
 }
+
+Future getLoginState() {
+  final Completer cmpl = new Completer();
+  
+  var ok = (response) => cmpl.complete(response);
+  var fail = (error) => cmpl.completeError(error);
+  js.context.callMethod('getLoginState', [ok, fail]);
+  
+  return cmpl.future;
+}
+
+Future initFB() {
+  final Completer cmpl = new Completer();
+  
+  var ok = (response) => cmpl.complete(response);
+  js.context.callMethod('initFB', [ok]);
+  
+  return cmpl.future;
+}

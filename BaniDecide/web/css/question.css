@@ -1,7 +1,25 @@
-#question-wrapper, #option-wrapper, #submit-option, #fb-comment-container {
-  width: 50%;
+#question-wrapper, #option-wrapper, #submit-option {
+  width: 80%;
   margin-left: auto;
   margin-right: auto;
+}
+
+#fb-comment-container {
+  width: 40%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 4%;
+}
+
+#question-container {
+  display: inline-block;
+  width: 75%;
+}
+
+#chart {
+  display: inline-block;
+  margin-left: -5%;
+  width: 25%;
 }
 
 #question-wrapper {
@@ -19,6 +37,7 @@
   margin-bottom: 10px;
   padding: 5px 10px;
   
+  cursor: pointer;
   border: 1px solid #CCC;
   background-color: #FFF;
 }
@@ -37,10 +56,6 @@
   font-size: 18px;
 }
 
-#fb-comment-container {
-  margin-top: 2%;
-}
-
 #buttons {
   height: 70px;
 }
@@ -49,7 +64,7 @@
   float: right;
   padding: 0px;
   border: 0px;
-  margin-left: 10px;
+  margin-right: 20px;
 }
 
 .fb-comments {

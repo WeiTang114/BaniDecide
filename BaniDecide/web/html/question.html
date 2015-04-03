@@ -38,23 +38,26 @@
           fjs.parentNode.insertBefore(js, fjs);
         }(document, 'script', 'facebook-jssdk'));
       </script>
-    <div id="question-container">
-      <div id="question-wrapper">
-        <span class="content"></span>
+    <div id="data-container">
+      <div id="question-container">
+        <div id="question-wrapper">
+          <span class="content"></span>
+        </div>
+        <div id ="option-wrapper">
+          <form id="options">
+            <div class="option hidden">
+              <input type="radio" name="option" value="0">
+              <sapn class="content"></sapn>
+              <div class="count"></div>
+            </div>
+          </form>
+        </div>
+        <br>
+        <div id="submit-option" class="btn btn-default hidden">SUBMIT</div>
       </div>
-      <div id ="option-wrapper">
-        <form id="options">
-          <div class="option hidden">
-            <input type="radio" name="option" value="0">
-            <sapn class="content"></sapn>
-            <div class="count"></div>
-          </div>
-        </form>
-      </div>
-      <br>
-      <div id="submit-option" class="btn btn-default hidden">SUBMIT</div>
+      <div id="chart"></div>
     </div>
-    <div id="chart"></div>
+    
     <div id="fb-comment-container">
       <div id="buttons">
         <button id="FBLogin" type="button" onclick = "fb_login()">

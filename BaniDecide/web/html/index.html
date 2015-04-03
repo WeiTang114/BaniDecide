@@ -6,31 +6,27 @@
   	<meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BanwoDecide</title>
     <link rel="stylesheet" href="../css/bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="../css/basic.css">
     <link rel="stylesheet" href="../css/home.css">
-    <link rel="stylesheet" href="../css/jumbotron-narrow.css">
+    <script src="../js/jquery-1.11.2.min.js"></script>
     <script src="http://www.parsecdn.com/js/parse-1.3.4.min.js"></script>
     <script src="../js/parse/parse_client.js"></script>
     <script src="../js/fb_utils.js"></script>
   </head> 
   <body>   
-    <script>
-      window.fbAsyncInit = function() {
-        initParse();
-        Parse.FacebookUtils.init({ // this line replaces FB.init({
-          appId      : '303348743168816', // Facebook App ID
-          status     : true,  // check Facebook Login status
-          cookie     : true,  // enable cookies to allow Parse to access the session
-          xfbml      : true,  // initialize Facebook social plugins on the page
-          version    : 'v1.0' // point to the latest Facebook Graph API version
+    <script>      
+      function redirect() {
+        getLoginState(function(resp) {
+          if(resp == 1) {
+            window.location.assign("index.html");
+          } else {
+            fb_login_callback(redirect, function(errmsg) {
+              console.log(errmsg);
+            });
+          }}, function(error) {
+            console.log(error)
         });
-      };
-      (function(d, s, id) {
-        var js, fjs = d.getElementsByTagName(s)[0];
-        if (d.getElementById(id)) return;
-        js = d.createElement(s); js.id = id;
-        js.src = "http://connect.facebook.net/zh_TW/all.js";
-        fjs.parentNode.insertBefore(js, fjs);
-      }(document, 'script', 'facebook-jssdk'));
+      }
     </script>
     <script type="application/dart" src="../dart/index.dart"></script>
     <!-- for this next line to work, your pubspec.yaml file must have a dependency on 'browser' -->
@@ -44,19 +40,22 @@
           <br><br>呼吸著同一片空氣的他，也許也有同樣的想法？
           <br>每天坐後面的她，眼神卻透露著不解。
           <br><br>好想要，好想要知道一點點，關於他們的內心，是不是也在想著：好想發廢文啊。
-         </div><br><br>
-        <a class="btn btn-lg btn-success" href="add_question.html">Create Your Question!</a>
+         </div><br>
+         
+        <img id="fblogin" class="hidden" src="../img/fbsignin.png" onclick="redirect()">
+        <br>
+        <a id="create" class="btn btn-lg btn-success hidden" href="add_question.html">Create Your Question!</a>
       </div>
        
       
       <div id="questions-asked">
         <div class="sub-title">朋友問過的問題</div>
-        <div class="question-wrapper">
+        <a class="question-container hidden">
           <img class="thumb">
           <span class="name"></span>
-          <span class="action"></span>
+          <span>問:</span>
           <span class="question"></span>
-      </div>
+        </a>
       </div>
     </div>
     <script>

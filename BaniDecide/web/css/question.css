@@ -1,25 +1,15 @@
-#question-wrapper, #option-wrapper, #submit-option {
-  width: 80%;
+#question-wrapper, #option-wrapper, #submit-option, #chart, #fb-comment-container, #questions-asked {
+  width: 50%;
   margin-left: auto;
   margin-right: auto;
 }
 
 #fb-comment-container {
-  width: 40%;
-  margin-left: auto;
-  margin-right: auto;
   margin-top: 4%;
 }
 
-#question-container {
-  display: inline-block;
-  width: 75%;
-}
-
 #chart {
-  display: inline-block;
-  margin-left: -5%;
-  width: 25%;
+  margin-top: 30px;
 }
 
 #question-wrapper {
@@ -72,6 +62,6 @@
   margin-right: auto;
 }
 
-.hidden {
-  display: none;
+#questions-asked {
+  margin-top: 50px;
 }

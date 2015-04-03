@@ -8,10 +8,8 @@ OtherQuestions obj;
 
 void main() {
   initFB().then((_) => getLoginState())
-  .then((response) {
-    String resp = response.toString();
-    
-    if (resp == '1') {
+  .then((response) {    
+    if (response == '1') {
       querySelector('#create').classes.remove('hidden');
       obj = new OtherQuestions();
       obj.generate();

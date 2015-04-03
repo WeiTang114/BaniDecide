@@ -15,9 +15,7 @@ function createChart(title, number, answers, counts, onSuccess, onFailure) {
       
       // Set chart options
       options = {'title':title,
-                 'width':'100%',
-                 'height':280,
-                 backgroundColor: 'transparent'};
+                 'height':300};
 
       // Instantiate and draw our chart, passing in some options.
       chart = new google.visualization.PieChart(document.getElementById('chart'));

@@ -32,31 +32,33 @@
     <script type="application/dart" src="../dart/index.dart"></script>
     <!-- for this next line to work, your pubspec.yaml file must have a dependency on 'browser' -->
     <script src="packages/browser/dart.js"></script>
-  
-    <div id="container">
-      <div id="desc-wrapper">
-        <div class="title">Banwo Decide</div><br>
-        <div class="content">
-                  當你心中，浮現了一絲渴望，好像有點羞恥，卻又好想知道。
-          <br><br>呼吸著同一片空氣的他，也許也有同樣的想法？
-          <br>每天坐後面的她，眼神卻透露著不解。
-          <br><br>好想要，好想要知道一點點，關於他們的內心，是不是也在想著：好想發廢文啊。
-         </div><br>
+    <div id="body2">
+      <div id="container">
+        <div id="desc-wrapper">
+          <div class="title">Banwo Decide</div><br>
+          <div class="content">
+                    當你心中，浮現了一絲渴望，好像有點羞恥，卻又好想知道。
+            <br><br>呼吸著同一片空氣的他，也許也有同樣的想法？
+            <br>每天坐後面的她，眼神卻透露著不解。
+            <br><br>好想要，好想要知道一點點，關於他們的內心，是不是也在想著：好想發廢文啊。
+           </div><br>
+           
+          <img id="fblogin" class="hidden" src="../img/fbsignin.png" onclick="redirect()">
+          <br>
+          <a id="create" class="btn btn-lg btn-success" href="add_question.html">Create Your Question!</a>
+        </div>
          
-        <img id="fblogin" class="hidden" src="../img/fbsignin.png" onclick="redirect()">
-        <br>
-        <a id="create" class="btn btn-lg btn-success" href="add_question.html">Create Your Question!</a>
-      </div>
-       
-      <div id="questions-asked">
-        <div class="sub-title">朋友問過的問題</div>
-        <a class="question-container hidden">
-          <img class="thumb">
-          <span class="name"></span>
-          <span>問:</span>
-          <span class="question"></span>
-        </a>
+        <div id="questions-asked">
+          <div class="sub-title">朋友問過的問題</div>
+          <a class="question-container hidden">
+            <img class="thumb">
+            <span class="name"></span>
+            <span>問:</span>
+            <span class="question"></span>
+          </a>
+        </div>
       </div>
     </div>
+    <!--<img id="bg-bottom" src="../img/bg-bottom.png">-->
   </body>
 </html>

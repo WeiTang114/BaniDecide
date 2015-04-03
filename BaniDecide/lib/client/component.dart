@@ -16,18 +16,12 @@ class QuestionInput {
   DivElement _removeBtn;
   
   QuestionInput() {
-    uploadUser().then((_) {
-      question = querySelector('#question');
-      _parent = querySelector('#question-container form');
-      _child = querySelector('.option-wrapper');
-      _removeBtn = querySelector('.remove-button');
+    question = querySelector('#question');
+    _parent = querySelector('#question-container form');
+    _child = querySelector('.option-wrapper');
+    _removeBtn = querySelector('.remove-button');
 
-      _startRemoveListener(querySelector('.option-wrapper'));
-    })
-    .catchError((ex) {
-      print('Upload user failed: $ex');
-      window.location.href = 'authen.html';
-    });
+    _startRemoveListener(querySelector('.option-wrapper'));
   }
   
   void startAddOptionListener() {
@@ -51,14 +45,14 @@ class QuestionInput {
       }
       getLoginState().then((response) {   
         if (response == '1') {
-          return _addQuestion().then((response) {
+          return uploadUser().then((_) =>_addQuestion().then((response) {
           _jumpPage(response[QUESTION_ID]);
-          });
+          }));
         } else {
           return fbLoginCallback().then((_) {
-            return _addQuestion().then((response) {
+            return uploadUser().then((_) =>_addQuestion().then((response) {
               _jumpPage(response[QUESTION_ID]);
-            });
+            }));
           });
         }
       }).catchError((ex)
@@ -189,9 +183,9 @@ class QuestionOutput {
     submit.onClick.listen((_) {
       getLoginState().then((response) {   
         if (response == '1') {
-          _select();
+          return uploadUser().then((_) => _select());
         } else {
-          return fbLoginCallback().then((_) =>_select());
+          return fbLoginCallback().then((_) => uploadUser().then((_) => _select()));
         }
       }).catchError((ex) => print(ex));
     });

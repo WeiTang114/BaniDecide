@@ -177,7 +177,13 @@ class QuestionOutput {
   
   void startSubmitListener() {
     submit.onClick.listen((_) {
-      _select();
+      getLoginState().then((response) {   
+        if (response == '1') {
+          _select();
+        } else {
+          return fbLoginCallback().then((_) =>_select());
+        }
+      }).catchError((ex) => print(ex));
     });
   }
   
@@ -199,6 +205,8 @@ class QuestionOutput {
     }).whenComplete(() {
       for (int i = 0; i < ansCount; i++)
         options[i].querySelector('.count').text = data[OPTIONS_COUNTS][i].toString() + ' 票';
+      querySelector('#questions-asked').classes.remove('hidden');
+      new OtherQuestions().generate();
       return _createChart();
     });
   }

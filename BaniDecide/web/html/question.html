@@ -26,41 +26,42 @@
 
   </head>
   <body>
-    <div id="fb-root"></div>
-      <script>
-        window.fbAsyncInit = function() {
-          initParse();
-          Parse.FacebookUtils.init({ // this line replaces FB.init({
-            appId      : '303348743168816', // Facebook App ID
-            status     : true,  // check Facebook Login status
-            cookie     : true,  // enable cookies to allow Parse to access the session
-            xfbml      : true,  // initialize Facebook social plugins on the page
-            version    : 'v1.0' // point to the latest Facebook Graph API version
-          });
-        };
-        (function(d, s, id) {
-          var js, fjs = d.getElementsByTagName(s)[0];
-          if (d.getElementById(id)) return;
-          js = d.createElement(s); js.id = id;
-          js.src = "http://connect.facebook.net/zh_TW/all.js";
-          fjs.parentNode.insertBefore(js, fjs);
-        }(document, 'script', 'facebook-jssdk'));
-      </script>
-      <div id="question-container">
-        <div id="question-wrapper">
-          <span class="content"></span>
-        </div>
-        <div id ="option-wrapper">
-          <form id="options">
-            <div class="option hidden">
-              <input type="radio" name="option" value="0">
-              <sapn class="content"></sapn>
-              <div class="count"></div>
-            </div>
-          </form>
-        </div>
-        <br>
-        <div id="submit-option" class="btn btn-default hidden">SUBMIT</div>
+    <div id="body2">
+      <div id="fb-root"></div>
+        <script>
+          window.fbAsyncInit = function() {
+            initParse();
+            Parse.FacebookUtils.init({ // this line replaces FB.init({
+              appId      : '303348743168816', // Facebook App ID
+              status     : true,  // check Facebook Login status
+              cookie     : true,  // enable cookies to allow Parse to access the session
+              xfbml      : true,  // initialize Facebook social plugins on the page
+              version    : 'v1.0' // point to the latest Facebook Graph API version
+            });
+          };
+          (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = "http://connect.facebook.net/zh_TW/all.js";
+            fjs.parentNode.insertBefore(js, fjs);
+          }(document, 'script', 'facebook-jssdk'));
+        </script>
+        <div id="question-container">
+          <div id="question-wrapper">
+            <span class="content"></span>
+          </div>
+          <div id ="option-wrapper">
+            <form id="options">
+              <div class="option hidden">
+                <input type="radio" name="option" value="0">
+                <sapn class="content"></sapn>
+                <div class="count"></div>
+              </div>
+            </form>
+          </div>
+          <br>
+          <div id="submit-option" class="btn btn-default hidden">SUBMIT</div>
         <div id="chart"></div>
       </div>
 
@@ -86,6 +87,7 @@
           <span class="question"></span>
         </a>
       </div>
+    </div>
     <script type="application/dart" src="../dart/question.dart"></script>
     <!-- for this next line to work, your pubspec.yaml file must have a dependency on 'browser' -->
     <script src="../packages/browser/dart.js"></script>

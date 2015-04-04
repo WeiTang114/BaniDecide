@@ -1,17 +1,17 @@
 body {
   font-family: 'Bree Serif', 'Open Sans', sans-serif;
-  
+    
+  background-image: url("../img/bg-top.png");
+  background-size: 100% auto;
+  background-repeat: no-repeat;
+}
+
+#body2 {
   background-image: url("../img/bg-bottom.png");
   background-size: 100% auto;
   background-repeat: no-repeat;
   background-position: bottom;
   padding-bottom: 150px;
-}
-
-#body2 {
-  background-image: url("../img/bg-top.png");
-  background-size: 100% auto;
-  background-repeat: no-repeat;
 }
 
 .hidden {

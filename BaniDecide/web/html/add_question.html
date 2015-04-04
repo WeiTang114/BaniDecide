@@ -17,22 +17,22 @@
     <script src="../js/fb_utils.js"></script>
   </head>
   <body>
-    <img id="bg-top" src="../img/bg-top.png">
-    <div id="title">BanWouDecide</div>
-    <div id="question-container">
-      <form>
-        <input type="text" id="question" class="form-control" name="question" placeholder="Enter Your Question">
-        <hr style="border:1px dashed #000; width:50%">
-        <div class="option-wrapper">
-          <input type="text" class="form-control option" name="option" placeholder="Enter Your Option">
-          <div class="remove-button hidden"><i class="fa fa-minus-circle"></i></div>
-        </div><br>
-      </form>
-      <div id="add-option">+ Add Option</div>
-      <div id="create-question" class="btn btn-default">CREATE
+    <div id="body2">
+      <div id="title">BanWouDecide</div>
+      <div id="question-container">
+        <form>
+          <input type="text" id="question" class="form-control" name="question" placeholder="Enter Your Question">
+          <hr style="border:1px dashed #000; width:50%">
+          <div class="option-wrapper">
+            <input type="text" class="form-control option" name="option" placeholder="Enter Your Option">
+            <div class="remove-button hidden"><i class="fa fa-minus-circle"></i></div>
+          </div><br>
+        </form>
+        <div id="add-option">+ Add Option</div>
+        <div id="create-question" class="btn btn-default">CREATE
+        </div>
       </div>
     </div>
-    <img id="bg-bottom" src="../img/bg-bottom.png">
     <script>
       window.fbAsyncInit = function() {
         initParse();
